@@ -20,10 +20,17 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        pass
+        self.vel_cuad = pygame.Vector2(100, 100)
+        self.pos_cuad = pygame.Vector2(150, 100)
+        size_cuad = pygame.Vector2(50, 50)
+        col_cuad = pygame.Color(255, 255, 100)
+
+        self.surf_cuad = pygame.Surface(size_cuad)
+        self.surf_cuad.fill(col_cuad)
 
     def _calculate_time(self):
-        pass
+        self.clock.tick(self.framerate)
+        self.delta_time = self.clock.get_time() / 1000.0
 
     def _process_events(self):
         for event in pygame.event.get():
@@ -31,10 +38,14 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
-        pass
+        self.pos_cuad.x += self.vel_cuad.x * self.delta_time
+        self.pos_cuad.y += self.vel_cuad.y * self.delta_time
 
     def _draw(self):
         self.screen.fill((0, 200, 128))
+
+        self.screen.blit(self.surf_cuad, self.pos_cuad)
+
         pygame.display.flip()
 
     def _clean(self):
