@@ -1,4 +1,10 @@
 import pygame
+import esper
+
+from src.create.prefab_creator import crear_cuadrado
+from src.ecs.systems.s_movement import system_movement
+from src.ecs.systems.s_rendering import system_rendering
+from src.ecs.systems.s_screen_bounce import system_screen_bounce
 
 class GameEngine:
     def __init__(self) -> None:
@@ -8,6 +14,8 @@ class GameEngine:
         self.is_running = False
         self.framerate = 60
         self.delta_time = 0
+
+        self.ecs_world = esper.World()
 
     def run(self) -> None:
         self._create()
@@ -20,13 +28,11 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        self.vel_cuad = pygame.Vector2(100, 100)
-        self.pos_cuad = pygame.Vector2(-25, 100)
-        size_cuad = pygame.Vector2(50, 50)
-        col_cuad = pygame.Color(255, 255, 100)
-
-        self.surf_cuad = pygame.Surface(size_cuad)
-        self.surf_cuad.fill(col_cuad)
+        crear_cuadrado(self.ecs_world,
+                       pygame.Vector2(50, 50),
+                       pygame.Vector2(150, 300),
+                       pygame.Vector2(-200, 300),
+                       pygame.Color(255, 100, 100))
 
     def _calculate_time(self):
         self.clock.tick(self.framerate)
@@ -38,27 +44,12 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
-        self.pos_cuad.x += self.vel_cuad.x * self.delta_time
-        self.pos_cuad.y += self.vel_cuad.y * self.delta_time
-
-        screen_rect = self.screen.get_rect()
-        cuad_rect = self.surf_cuad.get_rect(topleft=self.pos_cuad)
-
-        if cuad_rect.left <= 0 or cuad_rect.right >= screen_rect.width:
-            self.vel_cuad.x *= -1
-            cuad_rect.clamp_ip(screen_rect)
-            self.pos_cuad.x = cuad_rect.x
-
-        if cuad_rect.top <= 0 or cuad_rect.bottom >= screen_rect.height:
-            self.vel_cuad.y *= -1
-            cuad_rect.clamp_ip(screen_rect)
-            self.pos_cuad.y = cuad_rect.y
+        system_movement(self.ecs_world, self.delta_time)
+        system_screen_bounce(self.ecs_world, self.screen)
 
     def _draw(self):
         self.screen.fill((0, 200, 128))
-
-        self.screen.blit(self.surf_cuad, self.pos_cuad)
-
+        system_rendering(self.ecs_world, self.screen)
         pygame.display.flip()
 
     def _clean(self):
