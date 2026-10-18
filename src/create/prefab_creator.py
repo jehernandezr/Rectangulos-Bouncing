@@ -7,6 +7,7 @@ from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 
@@ -49,6 +50,23 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
     ecs_world.add_component(player_entity, CTagPlayer())
     return player_entity
 
+def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
+               player_size:pygame.Vector2, mouse_pos:pygame.Vector2,
+               bullet_info:dict):
+    size = pygame.Vector2(bullet_info["size"]["x"],
+                          bullet_info["size"]["y"])
+    col = pygame.Color(bullet_info["color"]["r"],
+                       bullet_info["color"]["g"],
+                       bullet_info["color"]["b"])
+    player_center = player_pos + (player_size / 2)
+    direction = mouse_pos - player_center
+    if direction.length() == 0:
+        return
+    vel = direction.normalize() * bullet_info["velocity"]
+    pos = player_center - (size / 2)
+    bullet_entity = crear_cuadrado(ecs_world, size, pos, vel, col)
+    ecs_world.add_component(bullet_entity, CTagBullet())
+
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
     spawner_entity = ecs_world.create_entity()
     ecs_world.add_component(spawner_entity,
@@ -59,6 +77,7 @@ def crear_input_jugador(ecs_world:esper.World):
     input_right = ecs_world.create_entity()
     input_up = ecs_world.create_entity()
     input_down = ecs_world.create_entity()
+    input_fire = ecs_world.create_entity()
 
     ecs_world.add_component(input_left,
                             CInputCommand("PLAYER_LEFT", pygame.K_LEFT))
@@ -68,3 +87,5 @@ def crear_input_jugador(ecs_world:esper.World):
                             CInputCommand("PLAYER_UP", pygame.K_UP))
     ecs_world.add_component(input_down,
                             CInputCommand("PLAYER_DOWN", pygame.K_DOWN))
+    ecs_world.add_component(input_fire,
+                            CInputCommand("PLAYER_FIRE", pygame.BUTTON_LEFT))
