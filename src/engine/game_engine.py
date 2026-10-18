@@ -7,6 +7,7 @@ from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
+from src.ecs.components.c_velocity import CVelocity
 
 class GameEngine:
     def __init__(self) -> None:
@@ -48,7 +49,9 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        crear_cuadrado_jugador(self.ecs_world, self.player_cfg, self.level_01_cfg["player_spawn"])
+        self._player_entity = crear_cuadrado_jugador(self.ecs_world, self.player_cfg, self.level_01_cfg["player_spawn"])
+        self._player_c_v = self.ecs_world.component_for_entity(self._player_entity, CVelocity)
+
         crear_spawner_enemigos(self.ecs_world, self.level_01_cfg)
 
     def _calculate_time(self):
