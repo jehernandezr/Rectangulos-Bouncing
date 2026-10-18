@@ -33,7 +33,7 @@ def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
                              enemy_info["velocity_max"])
     vel = pygame.Vector2(vel_mag, 0).rotate(random.uniform(0, 360))
     enemy_entity = crear_cuadrado(ecs_world, size, pos.copy(), vel, col)
-    ecs_world.add_component(enemy_entity, CTagEnemy)
+    ecs_world.add_component(enemy_entity, CTagEnemy())
 
 def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                            player_lvl_info:dict) -> int:
@@ -46,7 +46,7 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                          player_lvl_info["position"]["y"] - (size.y / 2))
     vel = pygame.Vector2(0, 0)
     player_entity = crear_cuadrado(ecs_world, size, pos, vel, col)
-    ecs_world.add_component(player_entity, CTagPlayer)
+    ecs_world.add_component(player_entity, CTagPlayer())
     return player_entity
 
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
@@ -56,5 +56,15 @@ def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
 
 def crear_input_jugador(ecs_world:esper.World):
     input_left = ecs_world.create_entity()
+    input_right = ecs_world.create_entity()
+    input_up = ecs_world.create_entity()
+    input_down = ecs_world.create_entity()
+
     ecs_world.add_component(input_left,
                             CInputCommand("PLAYER_LEFT", pygame.K_LEFT))
+    ecs_world.add_component(input_right,
+                            CInputCommand("PLAYER_RIGHT", pygame.K_RIGHT))
+    ecs_world.add_component(input_up,
+                            CInputCommand("PLAYER_UP", pygame.K_UP))
+    ecs_world.add_component(input_down,
+                            CInputCommand("PLAYER_DOWN", pygame.K_DOWN))

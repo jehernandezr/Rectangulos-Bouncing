@@ -9,7 +9,7 @@ from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
 from src.ecs.components.c_velocity import CVelocity
-from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 
 class GameEngine:
     def __init__(self) -> None:
@@ -82,3 +82,23 @@ class GameEngine:
 
     def _do_action(self, c_input:CInputCommand):
         print(c_input.name + " " + str(c_input.phase))
+        if c_input.name == "PLAYER_LEFT":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_v.vel.x -= self.player_cfg["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_v.vel.x += self.player_cfg["input_velocity"]
+        if c_input.name == "PLAYER_RIGHT":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_v.vel.x += self.player_cfg["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_v.vel.x -= self.player_cfg["input_velocity"]
+        if c_input.name == "PLAYER_UP":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_v.vel.y -= self.player_cfg["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_v.vel.y += self.player_cfg["input_velocity"]
+        if c_input.name == "PLAYER_DOWN":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_v.vel.y += self.player_cfg["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_v.vel.y -= self.player_cfg["input_velocity"]
