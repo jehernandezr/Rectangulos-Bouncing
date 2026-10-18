@@ -2,12 +2,14 @@ import json
 import pygame
 import esper
 
-from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador
+from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.components.c_input_command import CInputCommand
 
 class GameEngine:
     def __init__(self) -> None:
@@ -53,6 +55,7 @@ class GameEngine:
         self._player_c_v = self.ecs_world.component_for_entity(self._player_entity, CVelocity)
 
         crear_spawner_enemigos(self.ecs_world, self.level_01_cfg)
+        crear_input_jugador(self.ecs_world)
 
     def _calculate_time(self):
         self.clock.tick(self.framerate)
@@ -60,6 +63,7 @@ class GameEngine:
 
     def _process_events(self):
         for event in pygame.event.get():
+            system_input_player(self.ecs_world, event, self._do_action)
             if event.type == pygame.QUIT:
                 self.is_running = False
 
@@ -75,3 +79,6 @@ class GameEngine:
 
     def _clean(self):
         pygame.quit()
+
+    def _do_action(self, c_input:CInputCommand):
+        print(c_input.name + " " + str(c_input.phase))

@@ -3,6 +3,7 @@ import esper
 import pygame
 
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
+from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
@@ -52,3 +53,8 @@ def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
     spawner_entity = ecs_world.create_entity()
     ecs_world.add_component(spawner_entity,
                             CEnemySpawner(level_data))
+
+def crear_input_jugador(ecs_world:esper.World):
+    input_left = ecs_world.create_entity()
+    ecs_world.add_component(input_left,
+                            CInputCommand("PLAYER_LEFT", pygame.K_LEFT))
