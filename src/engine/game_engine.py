@@ -3,6 +3,7 @@ import pygame
 import esper
 
 from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador
+from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_movement import system_movement
@@ -71,6 +72,8 @@ class GameEngine:
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, self.delta_time)
         system_movement(self.ecs_world, self.delta_time)
         system_screen_bounce(self.ecs_world, self.screen)
+        system_collision_player_enemy(self.ecs_world, self._player_entity, self.level_01_cfg)
+        self.ecs_world._clear_dead_entities()
 
     def _draw(self):
         self.screen.fill(self.bg_color)
@@ -78,10 +81,10 @@ class GameEngine:
         pygame.display.flip()
 
     def _clean(self):
+        self.ecs_world.clear_database()
         pygame.quit()
 
     def _do_action(self, c_input:CInputCommand):
-        print(c_input.name + " " + str(c_input.phase))
         if c_input.name == "PLAYER_LEFT":
             if c_input.phase == CommandPhase.START:
                 self._player_c_v.vel.x -= self.player_cfg["input_velocity"]
