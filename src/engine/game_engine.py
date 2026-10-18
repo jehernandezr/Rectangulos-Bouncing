@@ -2,7 +2,7 @@ import json
 import pygame
 import esper
 
-from src.create.prefab_creator import crear_spawner_enemigos
+from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
@@ -34,6 +34,8 @@ class GameEngine:
             self.enemies_cfg = json.load(enemies_file)
         with open("assets/cfg/level_01.json", encoding="utf-8") as level_01_file:
             self.level_01_cfg = json.load(level_01_file)
+        with open("assets/cfg/player.json", encoding="utf-8") as player_file:
+            self.player_cfg = json.load(player_file)
 
     def run(self) -> None:
         self._create()
@@ -46,6 +48,7 @@ class GameEngine:
         self._clean()
 
     def _create(self):
+        crear_cuadrado_jugador(self.ecs_world, self.player_cfg, self.level_01_cfg["player_spawn"])
         crear_spawner_enemigos(self.ecs_world, self.level_01_cfg)
 
     def _calculate_time(self):
