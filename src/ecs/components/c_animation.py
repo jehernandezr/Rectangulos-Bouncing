@@ -12,6 +12,7 @@ class CAnimation:
         self.curr_anim = 0
         self.curr_anim_time = 0
         self.curr_frame = self.animations_list[self.curr_anim].start
+        self.completed = False
 
 class AnimationData:
     def __init__(self, name:str, start:int, end:int, framerate:float) -> None:

@@ -12,6 +12,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_hunter import CTagHunter
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 
@@ -60,6 +61,22 @@ def crear_cuadrado_hunter(ecs_world:esper.World, pos:pygame.Vector2,
                             CAnimation(hunter_info["animations"]))
     ecs_world.add_component(hunter_entity,
                             CHunterState(pos, hunter_info))
+
+def crear_explosion(ecs_world:esper.World, center:pygame.Vector2,
+                    explosion_info:dict):
+    explosion_surface = pygame.image.load(explosion_info["image"]).convert_alpha()
+    number_frames = explosion_info["animations"]["number_frames"]
+    size = pygame.Vector2(explosion_surface.get_width() / number_frames,
+                          explosion_surface.get_height())
+    pos = center - (size / 2)
+    vel = pygame.Vector2(0, 0)
+    explosion_entity = crear_sprite(ecs_world, pos, vel, explosion_surface)
+    c_s = ecs_world.component_for_entity(explosion_entity, CSurface)
+    c_s.area.w = size.x
+    c_a = CAnimation(explosion_info["animations"])
+    c_a.curr_anim_time = c_a.animations_list[c_a.curr_anim].framerate
+    ecs_world.add_component(explosion_entity, c_a)
+    ecs_world.add_component(explosion_entity, CTagExplosion())
 
 def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                            player_lvl_info:dict) -> int:

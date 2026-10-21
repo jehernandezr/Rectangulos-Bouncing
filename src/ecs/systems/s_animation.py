@@ -12,6 +12,7 @@ def system_animation(world:esper.World, delta_time:float):
             c_a.curr_frame += 1
             if c_a.curr_frame > c_a.animations_list[c_a.curr_anim].end:
                 c_a.curr_frame = c_a.animations_list[c_a.curr_anim].start
+                c_a.completed = True
             rect_surf = c_s.surf.get_rect()
             c_s.area.w = rect_surf.w / c_a.number_frames
             c_s.area.x = c_s.area.w * c_a.curr_frame
