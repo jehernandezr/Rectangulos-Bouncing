@@ -30,6 +30,9 @@ def crear_sprite(ecs_world:esper.World, pos:pygame.Vector2,
                             CTransform(pos))
     ecs_world.add_component(sprite_entity,
                             CVelocity(vel))
+    ecs_world.add_component(sprite_entity,
+                            CSurface.from_surface(surface))
+    return sprite_entity
 
 def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
                            enemy_info:dict):
@@ -57,18 +60,15 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
 def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
                player_size:pygame.Vector2, mouse_pos:pygame.Vector2,
                bullet_info:dict):
-    size = pygame.Vector2(bullet_info["size"]["x"],
-                          bullet_info["size"]["y"])
-    col = pygame.Color(bullet_info["color"]["r"],
-                       bullet_info["color"]["g"],
-                       bullet_info["color"]["b"])
+    bullet_surface = pygame.image.load(bullet_info["image"])
+    size = pygame.Vector2(bullet_surface.get_size())
     player_center = player_pos + (player_size / 2)
     direction = mouse_pos - player_center
     if direction.length() == 0:
         return
     vel = direction.normalize() * bullet_info["velocity"]
     pos = player_center - (size / 2)
-    bullet_entity = crear_cuadrado(ecs_world, size, pos, vel, col)
+    bullet_entity = crear_sprite(ecs_world, pos, vel, bullet_surface)
     ecs_world.add_component(bullet_entity, CTagBullet())
 
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
