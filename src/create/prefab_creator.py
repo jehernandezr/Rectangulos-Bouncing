@@ -23,17 +23,21 @@ def crear_cuadrado(ecs_world:esper.World, size:pygame.Vector2,
                             CVelocity(vel))
     return cuad_entity
 
+def crear_sprite(ecs_world:esper.World, pos:pygame.Vector2,
+                 vel:pygame.Vector2, surface:pygame.Surface) -> int:
+    sprite_entity = ecs_world.create_entity()
+    ecs_world.add_component(sprite_entity,
+                            CTransform(pos))
+    ecs_world.add_component(sprite_entity,
+                            CVelocity(vel))
+
 def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
                            enemy_info:dict):
-    size = pygame.Vector2(enemy_info["size"]["x"],
-                          enemy_info["size"]["y"])
-    col = pygame.Color(enemy_info["color"]["r"],
-                       enemy_info["color"]["g"],
-                       enemy_info["color"]["b"])
+    enemy_surface = pygame.image.load(enemy_info["image"]).convert_alpha()
     vel_mag = random.uniform(enemy_info["velocity_min"],
                              enemy_info["velocity_max"])
     vel = pygame.Vector2(vel_mag, 0).rotate(random.uniform(0, 360))
-    enemy_entity = crear_cuadrado(ecs_world, size, pos.copy(), vel, col)
+    enemy_entity = crear_sprite(ecs_world, pos.copy(), vel, enemy_surface)
     ecs_world.add_component(enemy_entity, CTagEnemy())
 
 def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
