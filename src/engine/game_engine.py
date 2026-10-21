@@ -3,6 +3,7 @@ import pygame
 import esper
 
 from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador, crear_bala
+from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_bullet_boundaries import system_bullet_boundaries
 from src.ecs.systems.s_collision_bullet_enemy import system_collision_bullet_enemy
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
@@ -86,6 +87,8 @@ class GameEngine:
         system_bullet_boundaries(self.ecs_world, self.screen)
         system_collision_player_enemy(self.ecs_world, self._player_entity, self.level_01_cfg)
         system_collision_bullet_enemy(self.ecs_world)
+
+        system_animation(self.ecs_world, self.delta_time)
         self.ecs_world._clear_dead_entities()
 
     def _draw(self):
@@ -124,6 +127,6 @@ class GameEngine:
                 if len(bullets) < self.level_01_cfg["player_spawn"]["max_bullets"]:
                     crear_bala(self.ecs_world,
                                self._player_c_t.pos,
-                               pygame.Vector2(self._player_c_s.surf.get_size()),
+                               pygame.Vector2(self._player_c_s.area.size),
                                pygame.Vector2(pygame.mouse.get_pos()),
                                self.bullet_cfg)

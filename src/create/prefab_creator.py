@@ -48,6 +48,7 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                            player_lvl_info:dict) -> int:
     player_sprite = pygame.image.load(player_info["image"]).convert_alpha()
     size = player_sprite.get_size()
+    size = (size[0] / player_info["animations"]["number_frames"], size[1])
     pos = pygame.Vector2(player_lvl_info["position"]["x"] - (size[0] / 2),
                          player_lvl_info["position"]["y"] - (size[1] / 2))
     vel = pygame.Vector2(0, 0)
@@ -61,7 +62,7 @@ def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
                player_size:pygame.Vector2, mouse_pos:pygame.Vector2,
                bullet_info:dict):
     bullet_surface = pygame.image.load(bullet_info["image"])
-    size = pygame.Vector2(bullet_surface.get_size())
+    size = pygame.Vector2(bullet_surface.get_rect().size)
     player_center = player_pos + (player_size / 2)
     direction = mouse_pos - player_center
     if direction.length() == 0:
