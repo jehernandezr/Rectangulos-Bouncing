@@ -5,6 +5,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_hunter import CTagHunter
 
 def system_screen_bounce(world:esper.World, screen:pygame.Surface):
     screen_rect = screen.get_rect()
@@ -14,6 +15,8 @@ def system_screen_bounce(world:esper.World, screen:pygame.Surface):
     c_v:CVelocity
     c_s:CSurface
     for entity, (c_t, c_v, c_s, c_e) in components:
+        if world.has_component(entity, CTagHunter):
+            continue
         cuad_rect = CSurface.get_area_relative(c_s.area, c_t.pos)
         if cuad_rect.left < 0 or cuad_rect.right > screen_rect.width:
             c_v.vel.x *= -1
