@@ -12,11 +12,8 @@ def system_enemy_spawner(world:esper.World, enemies_data:dict, delta_time:float)
         for spw_evt in c_spw.spawn_event_data:
             if not spw_evt.triggered and c_spw.current_time >= spw_evt.time:
                 spw_evt.triggered = True
-                if spw_evt.enemy_type == "Hunter":
-                    crear_cuadrado_hunter(world,
-                                          spw_evt.position,
-                                          enemies_data[spw_evt.enemy_type])
+                enemy_info = enemies_data[spw_evt.enemy_type]
+                if "velocity_chase" in enemy_info:
+                    crear_cuadrado_hunter(world, spw_evt.position, enemy_info)
                 else:
-                    crear_cuadrado_enemigo(world,
-                                           spw_evt.position,
-                                           enemies_data[spw_evt.enemy_type])
+                    crear_cuadrado_enemigo(world, spw_evt.position, enemy_info)

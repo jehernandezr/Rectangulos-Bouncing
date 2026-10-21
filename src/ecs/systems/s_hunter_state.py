@@ -12,8 +12,9 @@ def system_hunter_state(world:esper.World, player_entity:int, delta_time:float):
     pl_s = world.component_for_entity(player_entity, CSurface)
     pl_center = pygame.Vector2(CSurface.get_area_relative(pl_s.area, pl_t.pos).center)
 
-    components = world.get_components(CTransform, CVelocity, CSurface, CAnimation, CHunterState)
-    for _, (c_t, c_v, c_s, c_a, c_hst) in components:
+    components = world.get_components(CTransform, CVelocity, CSurface, CHunterState)
+    for hunter_entity, (c_t, c_v, c_s, c_hst) in components:
+        c_a = world.try_component(hunter_entity, CAnimation)
         hunter_center = pygame.Vector2(CSurface.get_area_relative(c_s.area, c_t.pos).center)
         if c_hst.state == HunterState.IDLE:
             _do_idle_state(c_v, c_a, c_hst, hunter_center, pl_center)
@@ -24,14 +25,14 @@ def system_hunter_state(world:esper.World, player_entity:int, delta_time:float):
 
 def _do_idle_state(c_v:CVelocity, c_a:CAnimation, c_hst:CHunterState,
                    hunter_center:pygame.Vector2, pl_center:pygame.Vector2):
-    _set_animation(c_a, 1)
+    _set_animation(c_a, "IDLE")
     c_v.vel.xy = (0, 0)
     if hunter_center.distance_to(pl_center) <= c_hst.distance_start_chase:
         c_hst.state = HunterState.CHASE
 
 def _do_chase_state(c_t:CTransform, c_v:CVelocity, c_a:CAnimation, c_hst:CHunterState,
                     hunter_center:pygame.Vector2, pl_center:pygame.Vector2):
-    _set_animation(c_a, 0)
+    _set_animation(c_a, "MOVE")
     direction = pl_center - hunter_center
     if direction.length_squared() > 0:
         c_v.vel = direction.normalize() * c_hst.velocity_chase
@@ -42,7 +43,7 @@ def _do_chase_state(c_t:CTransform, c_v:CVelocity, c_a:CAnimation, c_hst:CHunter
 
 def _do_return_state(c_t:CTransform, c_v:CVelocity, c_a:CAnimation, c_hst:CHunterState,
                      delta_time:float):
-    _set_animation(c_a, 0)
+    _set_animation(c_a, "MOVE")
     direction = c_hst.origin - c_t.pos
     if direction.length() <= c_hst.velocity_return * delta_time:
         c_t.pos.xy = c_hst.origin.xy
@@ -51,7 +52,14 @@ def _do_return_state(c_t:CTransform, c_v:CVelocity, c_a:CAnimation, c_hst:CHunte
     else:
         c_v.vel = direction.normalize() * c_hst.velocity_return
 
-def _set_animation(c_a:CAnimation, num_anim:int):
+def _set_animation(c_a:CAnimation, name:str):
+    if c_a is None:
+        return
+    for num_anim, anim_data in enumerate(c_a.animations_list):
+        if anim_data.name == name:
+            break
+    else:
+        return
     if c_a.curr_anim == num_anim:
         return
     c_a.curr_anim = num_anim

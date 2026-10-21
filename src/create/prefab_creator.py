@@ -39,6 +39,23 @@ def crear_sprite(ecs_world:esper.World, pos:pygame.Vector2,
                             CSurface.from_surface(surface))
     return sprite_entity
 
+def crear_animacion(ecs_world:esper.World, entity:int, entity_info:dict):
+    if "animations" not in entity_info:
+        return
+    c_s = ecs_world.component_for_entity(entity, CSurface)
+    c_a = CAnimation(entity_info["animations"])
+    c_a.curr_anim_time = c_a.animations_list[c_a.curr_anim].framerate
+    c_s.area.w = c_s.surf.get_width() / c_a.number_frames
+    c_s.area.x = c_s.area.w * c_a.curr_frame
+    ecs_world.add_component(entity, c_a)
+
+def tamano_cuadro(surface:pygame.Surface, entity_info:dict) -> pygame.Vector2:
+    number_frames = 1
+    if "animations" in entity_info:
+        number_frames = entity_info["animations"]["number_frames"]
+    return pygame.Vector2(surface.get_width() / number_frames,
+                          surface.get_height())
+
 def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
                            enemy_info:dict):
     enemy_surface = pygame.image.load(enemy_info["image"]).convert_alpha()
@@ -46,6 +63,7 @@ def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
                              enemy_info["velocity_max"])
     vel = pygame.Vector2(vel_mag, 0).rotate(random.uniform(0, 360))
     enemy_entity = crear_sprite(ecs_world, pos.copy(), vel, enemy_surface)
+    crear_animacion(ecs_world, enemy_entity, enemy_info)
     ecs_world.add_component(enemy_entity, CTagEnemy())
 
 def crear_cuadrado_hunter(ecs_world:esper.World, pos:pygame.Vector2,
@@ -53,43 +71,32 @@ def crear_cuadrado_hunter(ecs_world:esper.World, pos:pygame.Vector2,
     hunter_surface = pygame.image.load(hunter_info["image"]).convert_alpha()
     vel = pygame.Vector2(0, 0)
     hunter_entity = crear_sprite(ecs_world, pos.copy(), vel, hunter_surface)
-    c_s = ecs_world.component_for_entity(hunter_entity, CSurface)
-    c_s.area.w = c_s.surf.get_width() / hunter_info["animations"]["number_frames"]
+    crear_animacion(ecs_world, hunter_entity, hunter_info)
     ecs_world.add_component(hunter_entity, CTagEnemy())
     ecs_world.add_component(hunter_entity, CTagHunter())
-    ecs_world.add_component(hunter_entity,
-                            CAnimation(hunter_info["animations"]))
     ecs_world.add_component(hunter_entity,
                             CHunterState(pos, hunter_info))
 
 def crear_explosion(ecs_world:esper.World, center:pygame.Vector2,
                     explosion_info:dict):
     explosion_surface = pygame.image.load(explosion_info["image"]).convert_alpha()
-    number_frames = explosion_info["animations"]["number_frames"]
-    size = pygame.Vector2(explosion_surface.get_width() / number_frames,
-                          explosion_surface.get_height())
+    size = tamano_cuadro(explosion_surface, explosion_info)
     pos = center - (size / 2)
     vel = pygame.Vector2(0, 0)
     explosion_entity = crear_sprite(ecs_world, pos, vel, explosion_surface)
-    c_s = ecs_world.component_for_entity(explosion_entity, CSurface)
-    c_s.area.w = size.x
-    c_a = CAnimation(explosion_info["animations"])
-    c_a.curr_anim_time = c_a.animations_list[c_a.curr_anim].framerate
-    ecs_world.add_component(explosion_entity, c_a)
+    crear_animacion(ecs_world, explosion_entity, explosion_info)
     ecs_world.add_component(explosion_entity, CTagExplosion())
 
 def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                            player_lvl_info:dict) -> int:
     player_sprite = pygame.image.load(player_info["image"]).convert_alpha()
-    size = player_sprite.get_size()
-    size = (size[0] / player_info["animations"]["number_frames"], size[1])
-    pos = pygame.Vector2(player_lvl_info["position"]["x"] - (size[0] / 2),
-                         player_lvl_info["position"]["y"] - (size[1] / 2))
+    size = tamano_cuadro(player_sprite, player_info)
+    pos = pygame.Vector2(player_lvl_info["position"]["x"] - (size.x / 2),
+                         player_lvl_info["position"]["y"] - (size.y / 2))
     vel = pygame.Vector2(0, 0)
     player_entity = crear_sprite(ecs_world, pos, vel, player_sprite)
     ecs_world.add_component(player_entity, CTagPlayer())
-    ecs_world.add_component(player_entity,
-                            CAnimation(player_info["animations"]))
+    crear_animacion(ecs_world, player_entity, player_info)
     ecs_world.add_component(player_entity,
                             CPlayerState())
     return player_entity
@@ -97,8 +104,8 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
 def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
                player_size:pygame.Vector2, mouse_pos:pygame.Vector2,
                bullet_info:dict):
-    bullet_surface = pygame.image.load(bullet_info["image"])
-    size = pygame.Vector2(bullet_surface.get_rect().size)
+    bullet_surface = pygame.image.load(bullet_info["image"]).convert_alpha()
+    size = tamano_cuadro(bullet_surface, bullet_info)
     player_center = player_pos + (player_size / 2)
     direction = mouse_pos - player_center
     if direction.length() == 0:
@@ -106,6 +113,7 @@ def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
     vel = direction.normalize() * bullet_info["velocity"]
     pos = player_center - (size / 2)
     bullet_entity = crear_sprite(ecs_world, pos, vel, bullet_surface)
+    crear_animacion(ecs_world, bullet_entity, bullet_info)
     ecs_world.add_component(bullet_entity, CTagBullet())
 
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
