@@ -12,6 +12,6 @@ def system_bullet_boundaries(world:esper.World, screen:pygame.Surface):
     c_t:CTransform
     c_s:CSurface
     for bullet_entity, (c_t, c_s, _) in components:
-        bullet_rect = c_s.surf.get_rect(topleft=c_t.pos)
+        bullet_rect = CSurface.get_area_relative(c_s.area, c_t.pos)
         if not screen_rect.contains(bullet_rect):
             world.delete_entity(bullet_entity)
