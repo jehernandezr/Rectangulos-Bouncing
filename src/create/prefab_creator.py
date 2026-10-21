@@ -2,6 +2,7 @@ import random
 import esper
 import pygame
 
+from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_surface import CSurface
@@ -52,6 +53,8 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
     vel = pygame.Vector2(0, 0)
     player_entity = crear_sprite(ecs_world, pos, vel, player_sprite)
     ecs_world.add_component(player_entity, CTagPlayer())
+    ecs_world.add_component(player_entity,
+                            CAnimation(player_info["animations"]))
     return player_entity
 
 def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
