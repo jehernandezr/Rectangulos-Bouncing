@@ -17,5 +17,7 @@
             }
         ]
     },
-    "input_velocity": 100
+    "input_velocity": 100,
+    "sound_move": "assets/snd/propulsor.ogg",
+    "sound_hit": "assets/snd/impacto.ogg"
 }

@@ -103,7 +103,7 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
     ecs_world.add_component(player_entity, CTagPlayer())
     crear_animacion(ecs_world, player_entity, player_info)
     ecs_world.add_component(player_entity,
-                            CPlayerState())
+                            CPlayerState(player_info))
     return player_entity
 
 def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
