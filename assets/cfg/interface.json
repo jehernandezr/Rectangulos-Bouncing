@@ -1,0 +1,112 @@
+{
+    "font": "assets/fnt/PressStart2P.ttf",
+    "title": {
+        "text": "RECTANGULOS BOUNCING",
+        "size": 12,
+        "color": {
+            "r": 255,
+            "g": 215,
+            "b": 90
+        },
+        "position": {
+            "anchor": "midtop",
+            "offset": {
+                "x": 0,
+                "y": 8
+            }
+        }
+    },
+    "instructions": {
+        "text": "FLECHAS: MOVER  CLIC: DISPARAR  ESPACIO: ESCUDO  P: PAUSA",
+        "size": 6,
+        "color": {
+            "r": 170,
+            "g": 170,
+            "b": 170
+        },
+        "position": {
+            "anchor": "midbottom",
+            "offset": {
+                "x": 0,
+                "y": -6
+            }
+        }
+    },
+    "paused": {
+        "text": "PAUSA",
+        "size": 24,
+        "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+        },
+        "position": {
+            "anchor": "center",
+            "offset": {
+                "x": 0,
+                "y": -48
+            }
+        }
+    },
+    "shield_status": {
+        "text_ready": "ESCUDO LISTO",
+        "text_active": "ESCUDO ACTIVO",
+        "text_charging": "RECARGANDO",
+        "size": 7,
+        "color_ready": {
+            "r": 110,
+            "g": 255,
+            "b": 140
+        },
+        "color_active": {
+            "r": 120,
+            "g": 170,
+            "b": 255
+        },
+        "color_charging": {
+            "r": 255,
+            "g": 170,
+            "b": 70
+        },
+        "position": {
+            "anchor": "topleft",
+            "offset": {
+                "x": 8,
+                "y": 8
+            }
+        }
+    },
+    "shield_bar": {
+        "size": {
+            "w": 110,
+            "h": 6
+        },
+        "color_back": {
+            "r": 60,
+            "g": 60,
+            "b": 60
+        },
+        "color_ready": {
+            "r": 110,
+            "g": 255,
+            "b": 140
+        },
+        "color_active": {
+            "r": 120,
+            "g": 170,
+            "b": 255
+        },
+        "color_charging": {
+            "r": 255,
+            "g": 170,
+            "b": 70
+        },
+        "position": {
+            "anchor": "topleft",
+            "offset": {
+                "x": 8,
+                "y": 20
+            }
+        }
+    }
+}

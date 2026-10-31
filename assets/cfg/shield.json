@@ -1,0 +1,20 @@
+{
+    "image": "assets/img/shield.png",
+    "sound": "assets/snd/laser_special.ogg",
+    "sound_ready": "assets/snd/escudo_listo.ogg",
+    "animations": {
+        "number_frames": 4,
+        "list": [
+            {
+                "name": "ACTIVE",
+                "start": 0,
+                "end": 3,
+                "framerate": 12
+            }
+        ]
+    },
+    "duration": 2.0,
+    "cooldown": 5.0,
+    "radius": 40,
+    "blink_time": 0.5
+}
