@@ -41,6 +41,8 @@ class GameEngine:
                                      self.window_cfg["bg_color"]["b"])
 
         self.ecs_world = esper.World()
+        self.is_paused = False
+        self._pause_text_entity = None
 
     def _load_config_files(self):
         self.window_cfg = ServiceLocator.configs_service.get("assets/cfg/window.json")
@@ -87,6 +89,9 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
+        if self.is_paused:
+            self.ecs_world._clear_dead_entities()
+            return
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, self.delta_time)
         system_movement(self.ecs_world, self.delta_time)
 
@@ -134,7 +139,9 @@ class GameEngine:
                 self._player_c_v.vel.y += self.player_cfg["input_velocity"]
             elif c_input.phase == CommandPhase.END:
                 self._player_c_v.vel.y -= self.player_cfg["input_velocity"]
-        if c_input.name == "PLAYER_FIRE":
+        if c_input.name == "PAUSE" and c_input.phase == CommandPhase.START:
+            self._toggle_pause()
+        if c_input.name == "PLAYER_FIRE" and not self.is_paused:
             if c_input.phase == CommandPhase.START:
                 bullets = self.ecs_world.get_component(CTagBullet)
                 if len(bullets) < self.level_01_cfg["player_spawn"]["max_bullets"]:
@@ -143,3 +150,15 @@ class GameEngine:
                                pygame.Vector2(self._player_c_s.area.size),
                                pygame.Vector2(pygame.mouse.get_pos()),
                                self.bullet_cfg)
+
+    def _toggle_pause(self):
+        self.is_paused = not self.is_paused
+        if self.is_paused:
+            self._pause_text_entity = crear_texto(self.ecs_world,
+                                                  self.interface_cfg["paused"]["text"],
+                                                  self.interface_cfg["paused"],
+                                                  self.interface_cfg,
+                                                  self.screen.get_rect())
+        else:
+            self.ecs_world.delete_entity(self._pause_text_entity)
+            self._pause_text_entity = None

@@ -157,6 +157,7 @@ def crear_input_jugador(ecs_world:esper.World):
     input_up = ecs_world.create_entity()
     input_down = ecs_world.create_entity()
     input_fire = ecs_world.create_entity()
+    input_pause = ecs_world.create_entity()
 
     ecs_world.add_component(input_left,
                             CInputCommand("PLAYER_LEFT", pygame.K_LEFT))
@@ -168,3 +169,5 @@ def crear_input_jugador(ecs_world:esper.World):
                             CInputCommand("PLAYER_DOWN", pygame.K_DOWN))
     ecs_world.add_component(input_fire,
                             CInputCommand("PLAYER_FIRE", pygame.BUTTON_LEFT))
+    ecs_world.add_component(input_pause,
+                            CInputCommand("PAUSE", pygame.K_p))

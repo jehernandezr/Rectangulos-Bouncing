@@ -31,5 +31,21 @@
                 "y": -6
             }
         }
+    },
+    "paused": {
+        "text": "PAUSA",
+        "size": 24,
+        "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+        },
+        "position": {
+            "anchor": "center",
+            "offset": {
+                "x": 0,
+                "y": -48
+            }
+        }
     }
 }
