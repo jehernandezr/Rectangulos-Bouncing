@@ -1,5 +1,4 @@
 import asyncio
-import json
 import pygame
 import esper
 
@@ -22,6 +21,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
+from src.engine.service_locator import ServiceLocator
 
 class GameEngine:
     def __init__(self) -> None:
@@ -43,18 +43,12 @@ class GameEngine:
         self.ecs_world = esper.World()
 
     def _load_config_files(self):
-        with open("assets/cfg/window.json", encoding="utf-8") as window_file:
-            self.window_cfg = json.load(window_file)
-        with open("assets/cfg/enemies.json", encoding="utf-8") as enemies_file:
-            self.enemies_cfg = json.load(enemies_file)
-        with open("assets/cfg/level_01.json", encoding="utf-8") as level_01_file:
-            self.level_01_cfg = json.load(level_01_file)
-        with open("assets/cfg/player.json", encoding="utf-8") as player_file:
-            self.player_cfg = json.load(player_file)
-        with open("assets/cfg/bullet.json", encoding="utf-8") as bullet_file:
-            self.bullet_cfg = json.load(bullet_file)
-        with open("assets/cfg/explosion.json", encoding="utf-8") as explosion_file:
-            self.explosion_cfg = json.load(explosion_file)
+        self.window_cfg = ServiceLocator.configs_service.get("assets/cfg/window.json")
+        self.enemies_cfg = ServiceLocator.configs_service.get("assets/cfg/enemies.json")
+        self.level_01_cfg = ServiceLocator.configs_service.get("assets/cfg/level_01.json")
+        self.player_cfg = ServiceLocator.configs_service.get("assets/cfg/player.json")
+        self.bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
+        self.explosion_cfg = ServiceLocator.configs_service.get("assets/cfg/explosion.json")
 
     async def run(self) -> None:
         self._create()
