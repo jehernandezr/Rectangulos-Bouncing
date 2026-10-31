@@ -47,5 +47,66 @@
                 "y": -48
             }
         }
+    },
+    "shield_status": {
+        "text_ready": "ESCUDO LISTO",
+        "text_active": "ESCUDO ACTIVO",
+        "text_charging": "RECARGANDO",
+        "size": 7,
+        "color_ready": {
+            "r": 110,
+            "g": 255,
+            "b": 140
+        },
+        "color_active": {
+            "r": 120,
+            "g": 170,
+            "b": 255
+        },
+        "color_charging": {
+            "r": 255,
+            "g": 170,
+            "b": 70
+        },
+        "position": {
+            "anchor": "topleft",
+            "offset": {
+                "x": 8,
+                "y": 8
+            }
+        }
+    },
+    "shield_bar": {
+        "size": {
+            "w": 110,
+            "h": 6
+        },
+        "color_back": {
+            "r": 60,
+            "g": 60,
+            "b": 60
+        },
+        "color_ready": {
+            "r": 110,
+            "g": 255,
+            "b": 140
+        },
+        "color_active": {
+            "r": 120,
+            "g": 170,
+            "b": 255
+        },
+        "color_charging": {
+            "r": 255,
+            "g": 170,
+            "b": 70
+        },
+        "position": {
+            "anchor": "topleft",
+            "offset": {
+                "x": 8,
+                "y": 20
+            }
+        }
     }
 }

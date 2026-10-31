@@ -2,7 +2,7 @@ import asyncio
 import pygame
 import esper
 
-from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador, crear_bala, crear_texto
+from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador, crear_bala, crear_texto, agregar_escudo_jugador, crear_hud_escudo
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_bullet_boundaries import system_bullet_boundaries
 from src.ecs.systems.s_collision_bullet_enemy import system_collision_bullet_enemy
@@ -16,11 +16,14 @@ from src.ecs.systems.s_player_boundaries import system_player_boundaries
 from src.ecs.systems.s_player_state import system_player_state
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
+from src.ecs.systems.s_shield import system_shield
+from src.ecs.systems.s_shield_hud import system_shield_hud
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
+from src.ecs.components.c_shield import CShield
 from src.engine.service_locator import ServiceLocator
 
 class GameEngine:
@@ -52,6 +55,7 @@ class GameEngine:
         self.bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
         self.explosion_cfg = ServiceLocator.configs_service.get("assets/cfg/explosion.json")
         self.interface_cfg = ServiceLocator.configs_service.get("assets/cfg/interface.json")
+        self.shield_cfg = ServiceLocator.configs_service.get("assets/cfg/shield.json")
 
     async def run(self) -> None:
         self._create()
@@ -70,6 +74,8 @@ class GameEngine:
         self._player_c_t = self.ecs_world.component_for_entity(self._player_entity, CTransform)
         self._player_c_s = self.ecs_world.component_for_entity(self._player_entity, CSurface)
 
+        agregar_escudo_jugador(self.ecs_world, self._player_entity, self.shield_cfg)
+
         crear_spawner_enemigos(self.ecs_world, self.level_01_cfg)
         crear_input_jugador(self.ecs_world)
 
@@ -77,6 +83,7 @@ class GameEngine:
                     self.interface_cfg["title"], self.interface_cfg, self.screen.get_rect())
         crear_texto(self.ecs_world, self.interface_cfg["instructions"]["text"],
                     self.interface_cfg["instructions"], self.interface_cfg, self.screen.get_rect())
+        crear_hud_escudo(self.ecs_world, self.interface_cfg, self.screen.get_rect())
 
     def _calculate_time(self):
         self.clock.tick(self.framerate)
@@ -101,12 +108,15 @@ class GameEngine:
         system_player_boundaries(self.ecs_world, self.screen)
         system_screen_bounce(self.ecs_world, self.screen)
         system_bullet_boundaries(self.ecs_world, self.screen)
+        system_shield(self.ecs_world, self._player_entity, self.shield_cfg,
+                      self.explosion_cfg, self.delta_time)
         system_collision_player_enemy(self.ecs_world, self._player_entity, self.level_01_cfg,
                                       self.explosion_cfg)
         system_collision_bullet_enemy(self.ecs_world, self.explosion_cfg)
 
         system_animation(self.ecs_world, self.delta_time)
         system_explosion_kill(self.ecs_world)
+        system_shield_hud(self.ecs_world, self._player_entity, self.interface_cfg)
         self.ecs_world._clear_dead_entities()
 
     def _draw(self):
@@ -141,6 +151,11 @@ class GameEngine:
                 self._player_c_v.vel.y -= self.player_cfg["input_velocity"]
         if c_input.name == "PAUSE" and c_input.phase == CommandPhase.START:
             self._toggle_pause()
+        if c_input.name == "PLAYER_SHIELD" and not self.is_paused:
+            if c_input.phase == CommandPhase.START:
+                c_shield = self.ecs_world.try_component(self._player_entity, CShield)
+                if c_shield is not None:
+                    c_shield.requested = True
         if c_input.name == "PLAYER_FIRE" and not self.is_paused:
             if c_input.phase == CommandPhase.START:
                 bullets = self.ecs_world.get_component(CTagBullet)

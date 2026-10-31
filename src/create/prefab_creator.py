@@ -8,6 +8,7 @@ from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.ecs.components.c_hunter_state import CHunterState
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_player_state import CPlayerState
+from src.ecs.components.c_shield import CShield
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
@@ -17,6 +18,9 @@ from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_hud import CTagHud
 from src.ecs.components.tags.c_tag_hunter import CTagHunter
 from src.ecs.components.tags.c_tag_player import CTagPlayer
+from src.ecs.components.tags.c_tag_shield import CTagShield
+from src.ecs.components.tags.c_tag_shield_bar import CTagShieldBar
+from src.ecs.components.tags.c_tag_shield_text import CTagShieldText
 from src.engine.service_locator import ServiceLocator
 
 def crear_cuadrado(ecs_world:esper.World, size:pygame.Vector2,
@@ -146,6 +150,44 @@ def crear_texto(ecs_world:esper.World, text:str, text_info:dict,
     ecs_world.add_component(text_entity, CTagHud())
     return text_entity
 
+def agregar_escudo_jugador(ecs_world:esper.World, player_entity:int, shield_info:dict):
+    ecs_world.add_component(player_entity, CShield(shield_info))
+
+def crear_escudo(ecs_world:esper.World, center:pygame.Vector2, shield_info:dict) -> int:
+    shield_surface = ServiceLocator.images_service.get(shield_info["image"])
+    shield_surface.set_alpha(255)
+    size = tamano_cuadro(shield_surface, shield_info)
+    pos = center - (size / 2)
+    vel = pygame.Vector2(0, 0)
+    shield_entity = crear_sprite(ecs_world, pos, vel, shield_surface)
+    crear_animacion(ecs_world, shield_entity, shield_info)
+    ecs_world.add_component(shield_entity, CTagShield())
+    ServiceLocator.sounds_service.play(shield_info["sound"])
+    return shield_entity
+
+def crear_hud_escudo(ecs_world:esper.World, interface_info:dict, screen_rect:pygame.Rect):
+    status_info = interface_info["shield_status"]
+    text_info = dict(status_info, color=status_info["color_ready"])
+    text_entity = crear_texto(ecs_world, status_info["text_ready"], text_info,
+                              interface_info, screen_rect)
+    ecs_world.add_component(text_entity, CTagShieldText())
+
+    bar_info = interface_info["shield_bar"]
+    bar_size = pygame.Vector2(bar_info["size"]["w"], bar_info["size"]["h"])
+    back_color = pygame.Color(bar_info["color_back"]["r"],
+                              bar_info["color_back"]["g"],
+                              bar_info["color_back"]["b"])
+    c_anchor = CAnchor(bar_info["position"]["anchor"],
+                       punto_en_pantalla(screen_rect, bar_info["position"]))
+    bar_rect = pygame.Rect((0, 0), bar_size)
+    setattr(bar_rect, c_anchor.anchor, c_anchor.point)
+    bar_entity = ecs_world.create_entity()
+    ecs_world.add_component(bar_entity, CTransform(pygame.Vector2(bar_rect.topleft)))
+    ecs_world.add_component(bar_entity, CSurface(bar_size, back_color))
+    ecs_world.add_component(bar_entity, c_anchor)
+    ecs_world.add_component(bar_entity, CTagHud())
+    ecs_world.add_component(bar_entity, CTagShieldBar())
+
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
     spawner_entity = ecs_world.create_entity()
     ecs_world.add_component(spawner_entity,
@@ -158,6 +200,7 @@ def crear_input_jugador(ecs_world:esper.World):
     input_down = ecs_world.create_entity()
     input_fire = ecs_world.create_entity()
     input_pause = ecs_world.create_entity()
+    input_shield = ecs_world.create_entity()
 
     ecs_world.add_component(input_left,
                             CInputCommand("PLAYER_LEFT", pygame.K_LEFT))
@@ -171,3 +214,5 @@ def crear_input_jugador(ecs_world:esper.World):
                             CInputCommand("PLAYER_FIRE", pygame.BUTTON_LEFT))
     ecs_world.add_component(input_pause,
                             CInputCommand("PAUSE", pygame.K_p))
+    ecs_world.add_component(input_shield,
+                            CInputCommand("PLAYER_SHIELD", pygame.K_SPACE))
