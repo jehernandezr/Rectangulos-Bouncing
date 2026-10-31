@@ -2,6 +2,7 @@ import random
 import esper
 import pygame
 
+from src.ecs.components.c_anchor import CAnchor
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 from src.ecs.components.c_hunter_state import CHunterState
@@ -13,6 +14,7 @@ from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_explosion import CTagExplosion
+from src.ecs.components.tags.c_tag_hud import CTagHud
 from src.ecs.components.tags.c_tag_hunter import CTagHunter
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.engine.service_locator import ServiceLocator
@@ -119,6 +121,30 @@ def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
     crear_animacion(ecs_world, bullet_entity, bullet_info)
     ecs_world.add_component(bullet_entity, CTagBullet())
     ServiceLocator.sounds_service.play(bullet_info["sound"])
+
+def punto_en_pantalla(screen_rect:pygame.Rect, position_info:dict) -> pygame.Vector2:
+    anchor_point = pygame.Vector2(getattr(screen_rect, position_info["anchor"]))
+    return anchor_point + pygame.Vector2(position_info["offset"]["x"],
+                                         position_info["offset"]["y"])
+
+def crear_texto(ecs_world:esper.World, text:str, text_info:dict,
+                interface_info:dict, screen_rect:pygame.Rect) -> int:
+    font_path = text_info.get("font", interface_info["font"])
+    font = ServiceLocator.fonts_service.get(font_path, text_info["size"])
+    color = pygame.Color(text_info["color"]["r"],
+                         text_info["color"]["g"],
+                         text_info["color"]["b"])
+    c_s = CSurface.from_text(text, font, color)
+    c_anchor = CAnchor(text_info["position"]["anchor"],
+                       punto_en_pantalla(screen_rect, text_info["position"]))
+    text_rect = c_s.area.copy()
+    setattr(text_rect, c_anchor.anchor, c_anchor.point)
+    text_entity = ecs_world.create_entity()
+    ecs_world.add_component(text_entity, CTransform(pygame.Vector2(text_rect.topleft)))
+    ecs_world.add_component(text_entity, c_s)
+    ecs_world.add_component(text_entity, c_anchor)
+    ecs_world.add_component(text_entity, CTagHud())
+    return text_entity
 
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
     spawner_entity = ecs_world.create_entity()

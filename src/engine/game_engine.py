@@ -2,7 +2,7 @@ import asyncio
 import pygame
 import esper
 
-from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador, crear_bala
+from src.create.prefab_creator import crear_spawner_enemigos, crear_cuadrado_jugador, crear_input_jugador, crear_bala, crear_texto
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_bullet_boundaries import system_bullet_boundaries
 from src.ecs.systems.s_collision_bullet_enemy import system_collision_bullet_enemy
@@ -49,6 +49,7 @@ class GameEngine:
         self.player_cfg = ServiceLocator.configs_service.get("assets/cfg/player.json")
         self.bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
         self.explosion_cfg = ServiceLocator.configs_service.get("assets/cfg/explosion.json")
+        self.interface_cfg = ServiceLocator.configs_service.get("assets/cfg/interface.json")
 
     async def run(self) -> None:
         self._create()
@@ -69,6 +70,11 @@ class GameEngine:
 
         crear_spawner_enemigos(self.ecs_world, self.level_01_cfg)
         crear_input_jugador(self.ecs_world)
+
+        crear_texto(self.ecs_world, self.interface_cfg["title"]["text"],
+                    self.interface_cfg["title"], self.interface_cfg, self.screen.get_rect())
+        crear_texto(self.ecs_world, self.interface_cfg["instructions"]["text"],
+                    self.interface_cfg["instructions"], self.interface_cfg, self.screen.get_rect())
 
     def _calculate_time(self):
         self.clock.tick(self.framerate)

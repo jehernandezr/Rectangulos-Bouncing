@@ -1,0 +1,35 @@
+{
+    "font": "assets/fnt/PressStart2P.ttf",
+    "title": {
+        "text": "RECTANGULOS BOUNCING",
+        "size": 12,
+        "color": {
+            "r": 255,
+            "g": 215,
+            "b": 90
+        },
+        "position": {
+            "anchor": "midtop",
+            "offset": {
+                "x": 0,
+                "y": 8
+            }
+        }
+    },
+    "instructions": {
+        "text": "FLECHAS: MOVER  CLIC: DISPARAR  ESPACIO: ESCUDO  P: PAUSA",
+        "size": 6,
+        "color": {
+            "r": 170,
+            "g": 170,
+            "b": 170
+        },
+        "position": {
+            "anchor": "midbottom",
+            "offset": {
+                "x": 0,
+                "y": -6
+            }
+        }
+    }
+}
