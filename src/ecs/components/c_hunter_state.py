@@ -9,6 +9,7 @@ class CHunterState:
         self.velocity_return = hunter_info["velocity_return"]
         self.distance_start_chase = hunter_info["distance_start_chase"]
         self.distance_start_return = hunter_info["distance_start_return"]
+        self.sound_chase = hunter_info["sound_chase"]
 
 class HunterState(Enum):
     IDLE = 0

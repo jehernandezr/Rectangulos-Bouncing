@@ -6,6 +6,7 @@ from src.ecs.components.c_hunter_state import CHunterState, HunterState
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
+from src.engine.service_locator import ServiceLocator
 
 def system_hunter_state(world:esper.World, player_entity:int, delta_time:float):
     pl_t = world.component_for_entity(player_entity, CTransform)
@@ -28,6 +29,7 @@ def _do_idle_state(c_v:CVelocity, c_a:CAnimation, c_hst:CHunterState,
     _set_animation(c_a, "IDLE")
     c_v.vel.xy = (0, 0)
     if hunter_center.distance_to(pl_center) <= c_hst.distance_start_chase:
+        ServiceLocator.sounds_service.play(c_hst.sound_chase)
         c_hst.state = HunterState.CHASE
 
 def _do_chase_state(c_t:CTransform, c_v:CVelocity, c_a:CAnimation, c_hst:CHunterState,

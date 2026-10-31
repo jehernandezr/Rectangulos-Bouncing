@@ -66,6 +66,7 @@ def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
     enemy_entity = crear_sprite(ecs_world, pos.copy(), vel, enemy_surface)
     crear_animacion(ecs_world, enemy_entity, enemy_info)
     ecs_world.add_component(enemy_entity, CTagEnemy())
+    ServiceLocator.sounds_service.play(enemy_info["sound"])
 
 def crear_cuadrado_hunter(ecs_world:esper.World, pos:pygame.Vector2,
                           hunter_info:dict):
@@ -87,6 +88,7 @@ def crear_explosion(ecs_world:esper.World, center:pygame.Vector2,
     explosion_entity = crear_sprite(ecs_world, pos, vel, explosion_surface)
     crear_animacion(ecs_world, explosion_entity, explosion_info)
     ecs_world.add_component(explosion_entity, CTagExplosion())
+    ServiceLocator.sounds_service.play(explosion_info["sound"])
 
 def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                            player_lvl_info:dict) -> int:
@@ -116,6 +118,7 @@ def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
     bullet_entity = crear_sprite(ecs_world, pos, vel, bullet_surface)
     crear_animacion(ecs_world, bullet_entity, bullet_info)
     ecs_world.add_component(bullet_entity, CTagBullet())
+    ServiceLocator.sounds_service.play(bullet_info["sound"])
 
 def crear_spawner_enemigos(ecs_world:esper.World, level_data:dict):
     spawner_entity = ecs_world.create_entity()
