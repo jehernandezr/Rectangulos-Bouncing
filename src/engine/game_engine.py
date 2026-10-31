@@ -1,3 +1,4 @@
+import asyncio
 import json
 import pygame
 import esper
@@ -30,7 +31,7 @@ class GameEngine:
         pygame.display.set_caption(self.window_cfg["title"])
         self.screen = pygame.display.set_mode(
             (self.window_cfg["size"]["w"], self.window_cfg["size"]["h"]),
-            pygame.SCALED)
+            0)
         self.clock = pygame.time.Clock()
         self.is_running = False
         self.framerate = self.window_cfg["framerate"]
@@ -55,7 +56,7 @@ class GameEngine:
         with open("assets/cfg/explosion.json", encoding="utf-8") as explosion_file:
             self.explosion_cfg = json.load(explosion_file)
 
-    def run(self) -> None:
+    async def run(self) -> None:
         self._create()
         self.is_running = True
         while self.is_running:
@@ -63,6 +64,7 @@ class GameEngine:
             self._process_events()
             self._update()
             self._draw()
+            await asyncio.sleep(0)
         self._clean()
 
     def _create(self):
