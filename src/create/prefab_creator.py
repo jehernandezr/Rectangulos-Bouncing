@@ -15,6 +15,7 @@ from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_hunter import CTagHunter
 from src.ecs.components.tags.c_tag_player import CTagPlayer
+from src.engine.service_locator import ServiceLocator
 
 def crear_cuadrado(ecs_world:esper.World, size:pygame.Vector2,
                    pos:pygame.Vector2, vel:pygame.Vector2,
@@ -58,7 +59,7 @@ def tamano_cuadro(surface:pygame.Surface, entity_info:dict) -> pygame.Vector2:
 
 def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
                            enemy_info:dict):
-    enemy_surface = pygame.image.load(enemy_info["image"]).convert_alpha()
+    enemy_surface = ServiceLocator.images_service.get(enemy_info["image"])
     vel_mag = random.uniform(enemy_info["velocity_min"],
                              enemy_info["velocity_max"])
     vel = pygame.Vector2(vel_mag, 0).rotate(random.uniform(0, 360))
@@ -68,7 +69,7 @@ def crear_cuadrado_enemigo(ecs_world:esper.World, pos:pygame.Vector2,
 
 def crear_cuadrado_hunter(ecs_world:esper.World, pos:pygame.Vector2,
                           hunter_info:dict):
-    hunter_surface = pygame.image.load(hunter_info["image"]).convert_alpha()
+    hunter_surface = ServiceLocator.images_service.get(hunter_info["image"])
     vel = pygame.Vector2(0, 0)
     hunter_entity = crear_sprite(ecs_world, pos.copy(), vel, hunter_surface)
     crear_animacion(ecs_world, hunter_entity, hunter_info)
@@ -79,7 +80,7 @@ def crear_cuadrado_hunter(ecs_world:esper.World, pos:pygame.Vector2,
 
 def crear_explosion(ecs_world:esper.World, center:pygame.Vector2,
                     explosion_info:dict):
-    explosion_surface = pygame.image.load(explosion_info["image"]).convert_alpha()
+    explosion_surface = ServiceLocator.images_service.get(explosion_info["image"])
     size = tamano_cuadro(explosion_surface, explosion_info)
     pos = center - (size / 2)
     vel = pygame.Vector2(0, 0)
@@ -89,7 +90,7 @@ def crear_explosion(ecs_world:esper.World, center:pygame.Vector2,
 
 def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
                            player_lvl_info:dict) -> int:
-    player_sprite = pygame.image.load(player_info["image"]).convert_alpha()
+    player_sprite = ServiceLocator.images_service.get(player_info["image"])
     size = tamano_cuadro(player_sprite, player_info)
     pos = pygame.Vector2(player_lvl_info["position"]["x"] - (size.x / 2),
                          player_lvl_info["position"]["y"] - (size.y / 2))
@@ -104,7 +105,7 @@ def crear_cuadrado_jugador(ecs_world:esper.World, player_info:dict,
 def crear_bala(ecs_world:esper.World, player_pos:pygame.Vector2,
                player_size:pygame.Vector2, mouse_pos:pygame.Vector2,
                bullet_info:dict):
-    bullet_surface = pygame.image.load(bullet_info["image"]).convert_alpha()
+    bullet_surface = ServiceLocator.images_service.get(bullet_info["image"])
     size = tamano_cuadro(bullet_surface, bullet_info)
     player_center = player_pos + (player_size / 2)
     direction = mouse_pos - player_center
