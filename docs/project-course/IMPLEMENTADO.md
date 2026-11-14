@@ -3,6 +3,7 @@
 Estado del repositorio `dso-uniandes/bosconian` al 14 de noviembre de 2026, después de mezclar los PR 10 (bases de cada ronda), 11 (ajustes de la auditoría de ECS y configuración) y 12 (escenas del curso, `session_service` y pausa por comando). Cada punto dice dónde está el código:
 
 - **main**: ya mezclado en la rama principal.
+- **Pila del frente B**: los PR 14, 15, 17, 18 y 19, cada uno sobre el anterior, con la etapa 2 del frente B. Se mezclan en orden.
 - **Rama de Jerson**: `jflorez` y `backup/main-con-jerson`, con escenas y sonidos que vuelven a `main` en la integración.
 
 El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
@@ -19,10 +20,10 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Wraparound | Mundo de 1024 x 1536 que da la vuelta en ambos ejes, con `wrapped_delta` para la distancia más corta | main | |
 | Jugador | Aceleración en 8 direcciones con giro instantáneo, disparo en pares, muerte con varias explosiones, congelamiento de 2,5 s y reaparición | main | Vidas |
 | Habilidad especial por nivel | EXTRA CANNON en las rondas 3, 6, 9 y 10, con cuatro balas por disparo, y la trampa 4 para activarlo | main | Anuncio "EXTRA CANNON" al inicio de la ronda |
-| Bases | Bases H y V, cada una con cuerpo, seis cañones y núcleo como entidades separadas, con hitbox y etiqueta | main | Disparo de los cañones, núcleo animado y misil E |
-| Enemigos I, P y E | Aparición por los bordes con dos relojes. Cada tipo trae en `enemies.json` su velocidad, cuánto persigue y a qué estado pasa: I persigue y se aleja, P persigue y vaga, E va recto. Explosión que conserva la velocidad al morir | main | Misil E desde el núcleo |
-| Obstáculos | Rocas de tres formas y minas con luces animadas | main | Explosión letal de la mina y rocas indestructibles |
-| Colisiones con hitbox | Componente `CHitbox` en el jugador, las balas, los enemigos, los obstáculos, los cañones y el núcleo | main | Un sistema de colisión por par, con `wrapped_delta` |
+| Bases | Bases H y V, cada una con cuerpo, seis cañones y núcleo como entidades separadas, con hitbox y etiqueta. Cada cañón destruido vale 200 y queda con su sprite de destruido; el núcleo se acierta solo por su eje y la base completa vale 1500 (1700 con el sexto cañón), con `CEventBaseDestroyed` y `system_base_destroyed`. Los cañones de una base a 144 px o menos disparan hacia el jugador dentro de su abanico, con la espera y la recarga de la ronda y sus cuadros de apertura. Desde la ronda 5 el núcleo se cierra y se abre con `CCoreState`, resiste cerrado y lanza el misil E | main; choques en PR 17, disparo en PR 18, núcleo y misil en PR 19 | Cambio de alerta al destruir una base y cambio de ronda |
+| Enemigos I, P y E | Aparición por los bordes con dos relojes. Cada tipo trae en `enemies.json` su velocidad, cuánto persigue y a qué estado pasa: I persigue y se aleja, P persigue y vaga, E espera 0,4 s y va recto. Explosión que conserva la velocidad al morir. Mueren con la bala del jugador, con el jugador, con rocas, minas y balas de cañón; I y P rebotan entre sí y contra las bases (`CTagBounces`) | main; choques en PR 15, misil E en PR 19 | |
+| Obstáculos | Rocas de tres formas y minas con luces animadas, con sus puntos en `CPoints`. Las destruyen la bala del jugador, el jugador al chocar y la bala de cañón, con `destroy_obstacle` | main; choques en PR 14 y 18 | Explosión letal de la mina y rocas indestructibles |
+| Colisiones con hitbox | Componente `CHitbox` en todas las entidades que chocan. Una función común, `colliding_pairs`, arma los rectángulos con `wrapped_delta` y cada par tiene su sistema: bala y jugador contra obstáculo, enemigo y base; enemigo contra enemigo, peligro y base; bala de cañón contra obstáculo | main; sistemas en PR 14 a 19 | Rocas indestructibles, explosión de mina e ítem |
 | Puntaje, récord y vidas | `system_score` suma los puntos a la sesión y sube el récord, que arranca en 20.000. `scoring.json` con las vidas extra | main | Panel con puntaje y vidas extra |
 | Alertas | Componente `CAlert`, alerta inicial desde `alerts.json` y cambio de alerta con el modo trampa | main | Cambio por tiempo y por eventos |
 | Sonidos y música | Servicio de sonidos, `sounds.json`, 22 efectos en OGG y música por ronda | Rama de Jerson | Integrar la rama de Jerson |
@@ -44,6 +45,8 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON y la 6 cambia la alerta | main |
 | Pausa | ESC o P pausan y reanudan la partida con una bandera de la escena de juego; en pausa solo parpadean las estrellas | main. Ocultar entidades, texto "JUEGO PAUSADO" y menú de opciones: lo que sigue, con la escena de pausa de la rama de Jerson |
 | Pruebas | 50 pruebas sin ventana de `world_math`, el spawner y la máquina de estados de los enemigos | main |
+| Pruebas de las bases | Una bala por el eje del núcleo suma 1500 y una desviada 8 px cae en un cañón; en la ronda 5 el núcleo se cierra, se abre y lanza su misil, que espera y luego vuela recto | PR 17 y 19 |
+| Medición | Ronda 10 en alerta roja durante 30 s con cProfile: 1,58 ms por cuadro con el perfilador encendido, de los 16,7 ms que tiene un cuadro a 60 FPS. Las colisiones son el 58 % de la simulación (0,9 ms). Con eso la cuadrícula de colisiones queda fuera; se vuelve a medir en la versión web | Medición sobre la pila del PR 19 |
 | Documentación | `README.md` con instrucciones, controles, modo trampa, pruebas y estructura | main |
 | Sonidos | `sounds_service` y `sounds.json` | Rama de Jerson |
 
