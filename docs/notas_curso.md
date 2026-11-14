@@ -849,9 +849,34 @@ class CChangingText:
 
 **S5.3 Gameloop avanzado**
 - Tiempo variable: `pos += vel * delta_time`. Problemas: túnel, falta de determinismo, flotantes distintos entre procesadores (ARM, Intel, AMD) y no aprovecha varios núcleos.
-- Tiempo fijo con acumulador. Pseudocódigo según el video (no está en el demo):
-  - `acumulador += delta_time` en cada vuelta.
-  - `mientras acumulador >= tiempo_por_ciclo: simular(tiempo_por_ciclo); acumulador -= tiempo_por_ciclo`.
+- Tiempo fijo con acumulador. Pseudocódigo de la diapositiva "Tiempo variable fijo (*fixed delta-time*)" ([06:32]), copiado de la pantalla (no está en el demo):
+
+```python
+tiempo_anterior = calcular_tiempo_actual()
+acumulador_retraso = 0.0
+while ejecutando:
+    for evt in obtener_eventos():
+        procesar_evento(evt)
+
+    # TIEMPO VARIABLE NORMAL
+    tiempo_actual = calcular_tiempo_actual()
+    delta_tiempo = tiempo_actual - tiempo_anterior
+    tiempo_anterior = tiempo_actual
+
+    # ACUMULAR RETRASO
+    acumulador_retraso += delta_tiempo
+
+    # AVANZAR EN EL CICLO MIENTRAS HALLA TIEMPO EN EL ACUMULADOR
+    while acumulador_retraso >= TIEMPO_POR_CICLO:
+        simular(TIEMPO_POR_CICLO) # TAMBIÉN CONOCIDO COMO ACTUALIZAR o INTEGRAR
+        acumulador_retraso -= TIEMPO_POR_CICLO
+
+    dibujar()
+```
+
+  - Se sigue midiendo el tiempo real como siempre, pero no se usa directo: se guarda en `acumulador_retraso`.
+  - El `while` interno simula en pasos iguales de `TIEMPO_POR_CICLO` hasta gastar lo acumulado. Si el computador va lento, simula varias veces seguidas; si va rápido, a veces ninguna.
+  - Los eventos se procesan antes de medir el tiempo, y se dibuja una sola vez por vuelta, fuera del `while` interno.
   - `tiempo_por_ciclo = 1/60` (o `1/30`). Luego se dibuja siempre, una vez.
 - Ventaja: cada simulación usa el mismo delta, así que es determinista.
 - Riesgo: si simular tarda más que `tiempo_por_ciclo`, el acumulador crece en vez de bajar.
@@ -1343,6 +1368,7 @@ Ojo con la propia demo: `_do_editor_action` y el guardado viven en `PlayScene`, 
 
 **Confirmado con el video**
 - Resuelto con el video: las cifras de caché (ver arriba) y el uso del nivel editado (ver demo).
+- El `do_update` de `PlayScene` en el video ([10:55]) es igual al del ZIP: los sistemas de movimiento y colisión van dentro de `if not self._paused:` y `system_follow_mouse` y `system_editor_draggable` dentro de `if self._editor_mode:`.
 
 ---
 
@@ -1560,7 +1586,7 @@ Módulo 7: juego emergente, perfilado y steering behaviours. Fuentes: subtítulo
 
 **S7.3 Steering behaviours:**
 - Control autónomo de agentes que perciben su entorno. Tienen una velocidad y lo que cambia es su dirección. Cada comportamiento produce un vector-fuerza; se suman y el cambio es progresivo, no brusco. Advertencia del profesor: no es un curso de IA.
-- **Boids / cardumen** (subtítulo: "Voids"): vector A = cohesión (ir al promedio de posición del grupo), vector B = separación (no pegarse a los otros), vector C = dirección hacia un objetivo. Su suma da la dirección.
+- **Boids / cardumen** (subtítulo: "Voids"; diapositiva "IA - Comportamientos de dirección" en [02:20]): el dibujo es un cardumen de peces con tres flechas. **A (verde)** sale de un pez hacia un punto en medio del grupo, unido con líneas a sus vecinos: es la cohesión, ir al promedio de posición. **B (roja)** está en un pez pegado a otro y apunta hacia afuera: es la separación, mantener distancia. **C (morada)** está en un pez del borde y apunta hacia adelante: es la dirección hacia el objetivo. El profesor dice que basta sumar los tres vectores para obtener la dirección final.
 - **Buscar (seek):** `deseada = (objetivo - pos).normalize() * |vel|`; `steering = (deseada - vel)` escalado a una fuerza (la "fuerza de deseo"); `vel = vel + steering`. También se puede suavizar con interpolación. Con fuerza pequeña gira despacio y puede pasarse y corregir.
 - **Perseguir (pursue):** apuntar a `pos_objetivo + vel_objetivo` (donde *va a estar*) y repetir la misma cuenta.
 - **Huir (flee):** igual que buscar con la dirección deseada negada.
