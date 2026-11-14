@@ -3,7 +3,7 @@
 Estado del repositorio `dso-uniandes/bosconian` al 14 de noviembre de 2026, después de mezclar los PR 10 (bases de cada ronda), 11 (ajustes de la auditoría de ECS y configuración) y 12 (escenas del curso, `session_service` y pausa por comando). Cada punto dice dónde está el código:
 
 - **main**: ya mezclado en la rama principal.
-- **Pila del frente B**: los PR 14, 15, 17, 18 y 19, cada uno sobre el anterior, con la etapa 2 del frente B. Se mezclan en orden.
+- **Pila del frente B**: los PR 14, 15, 17, 18, 19 y 20, cada uno sobre el anterior, con la etapa 2 del frente B. Se mezclan en orden.
 - **Rama de Jerson**: `jflorez` y `backup/main-con-jerson`, con escenas y sonidos que vuelven a `main` en la integración.
 
 El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
@@ -42,7 +42,7 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Escenas | Título y juego con la forma de la semana 5: cada escena tiene su mundo y sus ganchos `do_create`, `do_update`, `do_action`, `do_draw` y `do_clean`, pide el cambio con `switch_scene` y el motor lo hace al final del cuadro. La escena de juego recibe la ruta de su nivel, y `scenes.json` lista el título y los diez niveles. El título arma sus textos como entidades | main |
 | Configuración | Un JSON por tipo de entidad y uno por ronda, sin valores del juego en el código, sin comentarios ni docstrings | main |
 | Orden de dibujo | Capas del mundo en `window.json`, con el cuerpo de la base debajo de sus cañones y su núcleo | main |
-| Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON y la 6 cambia la alerta | main |
+| Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON, la 6 cambia la alerta y la 7 destruye todas las bases | main; la 7 en PR 20 |
 | Pausa | ESC o P pausan y reanudan la partida con una bandera de la escena de juego; en pausa solo parpadean las estrellas | main. Ocultar entidades, texto "JUEGO PAUSADO" y menú de opciones: lo que sigue, con la escena de pausa de la rama de Jerson |
 | Pruebas | 50 pruebas sin ventana de `world_math`, el spawner y la máquina de estados de los enemigos | main |
 | Medición | Ronda 10 en alerta roja durante 30 s con cProfile: 1,58 ms por cuadro con el perfilador encendido, de los 16,7 ms que tiene un cuadro a 60 FPS. Las colisiones son el 58 % de la simulación (0,9 ms). Con eso la cuadrícula de colisiones queda fuera; se vuelve a medir en la versión web | Medición sobre la pila del PR 19 |
