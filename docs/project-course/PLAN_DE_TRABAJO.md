@@ -368,9 +368,9 @@ La habilidad especial se define por nivel, como pide la lista, y la tienen las *
 
 - **Rondas 1 a 4**: el núcleo queda siempre abierto y no lanza misiles.
 - **Rondas 5 a 10**: el núcleo se cierra durante 1,08 segundos, luego se abre durante el tiempo de la ronda (tabla de la sección 5.21) y repite el ciclo. Cerrado resiste los disparos.
-- **Misil E**: sale una vez por cada apertura, por la abertura del núcleo que mira hacia el jugador. Espera 0,4 segundos quieto y luego viaja en línea recta, sin desviarse. Vale 70 puntos. Su sprite es `[41, 109, 7, 16]`.
+- **Misil E**: sale una vez por cada apertura, por la abertura del núcleo que mira hacia el jugador. Espera 0,4 segundos quieto y luego viaja en línea recta por el eje de la abertura, sin desviarse, y atraviesa bases y enemigos. El ciclo del núcleo solo corre con el núcleo en pantalla, como los cañones. Vale 70 puntos. Su sprite es `[41, 109, 7, 16]`.
 - **Velocidad del misil E**: medida en la ronda 9 (113,7 px/s). Las demás rondas escalan en la misma proporción que la velocidad del enemigo I: 96,7 px/s en la ronda 5, 99,5 en la 6, 105,2 en la 7, 108,0 en la 8 y 116,5 en la 10.
-- **Cómo acertar el núcleo**: solo con una bala que entra por su eje, con un margen de 2 píxeles hacia cada lado. En la base H el eje es horizontal, así que el núcleo se acierta disparando desde la izquierda o la derecha. En la base V el eje es vertical, y se acierta desde arriba o desde abajo. Una bala desviada unos 8 píxeles del eje pega en un cañón.
+- **Cómo acertar el núcleo**: solo con una bala que entra por su eje, con un margen de 2 píxeles hacia cada lado. En la base H el eje es horizontal, así que el núcleo se acierta disparando desde la izquierda o la derecha. En la base V el eje es vertical, y se acierta desde arriba o desde abajo. Una bala desviada unos 8 píxeles del eje pega en un cañón. Si el cañón lateral ya cayó, una bala por ese lado también destruye el núcleo abierto, como en el original.
 - **Cañón contra la bala del jugador**: la bala destruye un cañón cuando pasa a 9 píxeles o menos de su centro, medido en el eje perpendicular a la bala.
 
 ### 5.9 Enemigos que persiguen: I y P
@@ -478,13 +478,13 @@ Cada fila de esta tabla es **un sistema de colisión propio**, como en el curso.
 | `system_collision_player_base` | Jugador con cañón o núcleo | Cae la base completa, el jugador suma 1500 y muere |
 | `system_collision_player_hazard` | Jugador con roca indestructible o explosión de mina | Muere el jugador |
 | `system_collision_player_item` | Jugador con ítem | El jugador recoge el ítem |
-| `system_collision_enemy_enemy` | Enemigo con enemigo | Rebotan los dos |
-| `system_collision_enemy_base` | Enemigo con cañón o núcleo | Rebota el enemigo |
+| `system_collision_enemy_enemy` | Enemigo con enemigo | Rebotan los dos; el misil E los atraviesa |
+| `system_collision_enemy_base` | Enemigo con cañón o núcleo | Rebota el enemigo; el misil E la atraviesa |
 | `system_collision_enemy_hazard` | Enemigo con roca, mina, bala enemiga, roca indestructible o explosión de mina | Muere el enemigo, sin puntos |
 | `system_collision_enemy_bullet_obstacle` | Bala de cañón con roca o mina | Mueren las dos y el jugador suma los puntos |
 | `system_collision_indestructible_base` | Roca indestructible con cañón o núcleo | La roca rebota |
 
-Toda colisión produce una explosión con el prefab `create_explosion`, y la del jugador produce varias. Para que el juego vaya rápido en el navegador se mide primero, como enseña la semana 7 del curso: `python -m cProfile -o perfil.prof .\main.py` y luego `snakeviz perfil.prof` muestran en qué se va el tiempo. Si las colisiones pesan, lo que no se mueve (obstáculos, cañones y núcleos) se guarda al cargar la ronda en una cuadrícula de celdas de 32 píxeles. La cuadrícula vive en el componente `CCollisionGrid` de una entidad propia, y la función común de colisión solo revisa los objetos de las celdas cercanas.
+Toda colisión produce una explosión con el prefab `create_explosion`, y la del jugador produce varias. La bala que se traga el núcleo cerrado desaparece sin explosión, como en el original. Para que el juego vaya rápido en el navegador se mide primero, como enseña la semana 7 del curso: `python -m cProfile -o perfil.prof .\main.py` y luego `snakeviz perfil.prof` muestran en qué se va el tiempo. Si las colisiones pesan, lo que no se mueve (obstáculos, cañones y núcleos) se guarda al cargar la ronda en una cuadrícula de celdas de 32 píxeles. La cuadrícula vive en el componente `CCollisionGrid` de una entidad propia, y la función común de colisión solo revisa los objetos de las celdas cercanas.
 
 ### 5.16 Puntaje y récord
 
