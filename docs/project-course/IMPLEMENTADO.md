@@ -45,7 +45,6 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON y la 6 cambia la alerta | main |
 | Pausa | ESC o P pausan y reanudan la partida con una bandera de la escena de juego; en pausa solo parpadean las estrellas | main. Ocultar entidades, texto "JUEGO PAUSADO" y menú de opciones: lo que sigue, con la escena de pausa de la rama de Jerson |
 | Pruebas | 50 pruebas sin ventana de `world_math`, el spawner y la máquina de estados de los enemigos | main |
-| Pruebas de las bases | Una bala por el eje del núcleo suma 1500 y una desviada 8 px cae en un cañón; en la ronda 5 el núcleo se cierra, se abre y lanza su misil, que espera y luego vuela recto | PR 17 y 19 |
 | Medición | Ronda 10 en alerta roja durante 30 s con cProfile: 1,58 ms por cuadro con el perfilador encendido, de los 16,7 ms que tiene un cuadro a 60 FPS. Las colisiones son el 58 % de la simulación (0,9 ms). Con eso la cuadrícula de colisiones queda fuera; se vuelve a medir en la versión web | Medición sobre la pila del PR 19 |
 | Documentación | `README.md` con instrucciones, controles, modo trampa, pruebas y estructura | main |
 | Sonidos | `sounds_service` y `sounds.json` | Rama de Jerson |

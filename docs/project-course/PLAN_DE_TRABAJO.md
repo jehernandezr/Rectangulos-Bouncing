@@ -233,12 +233,12 @@ En cada cuadro de la partida los sistemas corren en este orden. Cada grupo nombr
 6. **Cámara y estrellas**: `system_camera_follow` (la cámara guarda el centro de la vista y cuánto se movió en el cuadro), `system_star_parallax` y `system_star_twinkle`.
 7. **Bases**: `system_base_activation`, `system_core_state` y `system_cannon_fire`.
 8. **Colisiones**, un sistema por par, con los nombres de la sección 5.15.
-9. **Reglas**: `system_alerts`, `system_score`, `system_base_destroyed` y `system_round_progress`.
+9. **Reglas**: `system_alerts`, `system_base_destroyed`, `system_score` y `system_round_progress`.
 10. **Cierre del cuadro**: `system_animation`, `system_explosion_kill`, `system_minimap` y `system_hud`. Al final, `simulate` borra las entidades muertas.
 
 Al dibujar, `system_star_rendering` pinta las estrellas en coordenadas de pantalla y después `system_rendering` pinta el mundo. Este último usa `wrapped_delta` (`src/engine/world_math.py`), que da la distancia más corta entre dos puntos en un mundo que da la vuelta, y ubica cada entidad respecto al centro de la cámara.
 
-Mientras el jugador está muriendo, la escena salta los grupos 3, 4, 5 y 9, pero las animaciones siguen. En pausa corren solo el parpadeo de las estrellas y el menú de pausa. En el modo editor corren `system_editor_follow_mouse` y `system_editor_draggable` en lugar de los grupos 2 a 9.
+Mientras el jugador está muriendo, la escena salta los grupos 3 a 8, pero las animaciones siguen. En pausa corren solo el parpadeo de las estrellas y el menú de pausa. En el modo editor corren `system_editor_follow_mouse` y `system_editor_draggable` en lugar de los grupos 2 a 9.
 
 **Vistas de depurado**: un comando rota entre la vista normal, la de hitboxes y la de velocidades. Cada vista es su propio sistema de dibujo, `system_rendering_debug_rects` y `system_rendering_debug_velocity`, que corre después de `system_rendering`. La de hitboxes dibuja el rectángulo de cada `CHitbox`, y la de velocidades dibuja una línea con la dirección y la rapidez de cada `CVelocity`. Así lo muestra la demostración de la semana 6, y sirven para revisar choques y persecuciones sin `print`.
 
@@ -367,7 +367,7 @@ La habilidad especial se define por nivel, como pide la lista, y la tienen las *
 ### 5.8 Núcleo y misil E
 
 - **Rondas 1 a 4**: el núcleo queda siempre abierto y no lanza misiles.
-- **Rondas 5 a 10**: el núcleo se cierra durante 1,1 segundos, luego se abre durante el tiempo de la ronda (tabla de la sección 5.21) y repite el ciclo. Cerrado resiste los disparos.
+- **Rondas 5 a 10**: el núcleo se cierra durante 1,08 segundos, luego se abre durante el tiempo de la ronda (tabla de la sección 5.21) y repite el ciclo. Cerrado resiste los disparos.
 - **Misil E**: sale una vez por cada apertura, por la abertura del núcleo que mira hacia el jugador. Espera 0,4 segundos quieto y luego viaja en línea recta, sin desviarse. Vale 70 puntos. Su sprite es `[41, 109, 7, 16]`.
 - **Velocidad del misil E**: medida en la ronda 9 (113,7 px/s). Las demás rondas escalan en la misma proporción que la velocidad del enemigo I: 96,7 px/s en la ronda 5, 99,5 en la 6, 105,2 en la 7, 108,0 en la 8 y 116,5 en la 10.
 - **Cómo acertar el núcleo**: solo con una bala que entra por su eje, con un margen de 2 píxeles hacia cada lado. En la base H el eje es horizontal, así que el núcleo se acierta disparando desde la izquierda o la derecha. En la base V el eje es vertical, y se acierta desde arriba o desde abajo. Una bala desviada unos 8 píxeles del eje pega en un cañón.
@@ -628,7 +628,7 @@ Esta tabla reúne todos los valores que cambian de una ronda a otra. Las posicio
 | Intervalo del espía (s) | 32,5 | 31,9 | 30,8 | 30,3 | 29,2 | 28,7 | 27,6 | 27,0 | 26,0 | 25,4 |
 | Recarga de cada cañón (s) | 3,61 | 3,52 | 3,34 | 3,25 | 3,07 | 2,98 | 2,79 | 2,70 | 2,52 | 2,43 |
 | Velocidad de la bala de cañón (px/s) | 38,2 | 40,3 | 44,6 | 46,8 | 51,1 | 53,3 | 57,6 | 59,8 | 64,1 | 66,3 |
-| Núcleo abierto (s; cerrado siempre 1,1 s) | siempre | siempre | siempre | siempre | 3,6 | 3,2 | 3,2 | 5,4 | 3,2 | 3,2 |
+| Núcleo abierto (s; cerrado siempre 1,08 s) | siempre | siempre | siempre | siempre | 3,61 | 3,25 | 3,25 | 5,41 | 3,25 | 3,25 |
 | Velocidad del misil E (px/s) | - | - | - | - | 96,7 | 99,5 | 105,2 | 108,0 | 113,7 | 116,5 |
 | EXTRA CANNON | - | - | sí | - | - | sí | - | - | sí | sí |
 | Inicio del jugador, su centro (x, y) | (520, 776) | (520, 776) | (520, 1408) | (520, 1408) | (520, 776) | (520, 1408) | (520, 1408) | (520, 1408) | (520, 776) | (520, 776) |
@@ -765,7 +765,7 @@ Al terminar esta etapa se puede jugar cualquier ronda con todas sus reglas, perd
 2. **Cañones y sus balas** según la sección 5.7, con `system_base_activation` y `system_cannon_fire`, y el prefab `create_cannon_bullet`.
 3. **Núcleo y misil E** según la sección 5.8, con el patrón State: `CCoreState` guarda si está abierto o cerrado y `system_core_state` lo cambia y lanza el misil.
 4. **Destrucción de bases** según la sección 5.6: el sistema de colisión crea un evento `CEventBaseDestroyed`, y `system_base_destroyed` borra la base completa y da los puntos.
-   - *Listo cuando:* una prueba sin ventana confirma que una bala por el eje del núcleo suma 1500 y que una bala desviada 8 píxeles cae en un cañón, y en la ronda 5 el núcleo se abre, se cierra y lanza su misil.
+   - *Listo cuando:* una simulación sin ventana confirma que una bala por el eje del núcleo suma 1500 y que una bala desviada 8 píxeles cae en un cañón, y en la ronda 5 el núcleo se abre, se cierra y lanza su misil.
 5. **Medición**: perfilar la ronda 10 en escritorio y en la web con cProfile y SnakeViz, y decidir con esos datos si hace falta la cuadrícula de colisiones.
 
 **Frente C**
