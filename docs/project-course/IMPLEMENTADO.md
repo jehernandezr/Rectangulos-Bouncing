@@ -3,6 +3,7 @@
 Estado del repositorio `dso-uniandes/bosconian` al 14 de noviembre de 2026, después de mezclar los PR 10 (bases de cada ronda) y 11 (ajustes de la auditoría de ECS y configuración). Cada punto dice dónde está el código:
 
 - **main**: ya mezclado en la rama principal.
+- **PR 12**: escenas con la forma del curso, motor que solo administra escenas, `session_service` y pausa por comando.
 - **Rama de Jerson**: `jflorez` y `backup/main-con-jerson`, con escenas y sonidos que vuelven a `main` en la integración.
 
 El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
@@ -32,18 +33,20 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Pieza | Lo implementado | Dónde |
 |---|---|---|
 | Game loop | Loop asíncrono con delta time, con su tope en `window.json` (`min_framerate`), listo para pygbag | main |
+| Motor | Administra la ventana, el reloj, el dibujo final y las escenas en un diccionario por nombre. Las configuraciones del juego las pide cada escena a `configs_service` | PR 12 |
 | Pantalla | Lienzo de 256 x 208 escalado a mano a 768 x 624, con área de juego de 192 x 208 | main |
 | ECS | Componentes con solo datos, etiquetas en `tags/`, prefabs `create_*` y sistemas `system_*` que tratan igual a todas las entidades, sin preguntar el tipo | main |
-| Command | Teclas como `CInputCommand` con su comando. Las teclas vienen de `input.json` y `cheats.json`, y cada comando hace su trabajo en `execute` | main |
+| Command | Teclas como `CInputCommand` con nombre, tecla y fase. Las teclas vienen de `input.json` y `cheats.json`. Los comandos del jugador y del modo trampa hacen su trabajo en `execute`, y la escena atiende START y PAUSE en `do_action` | main; nombre, fase y `do_action` en PR 12 |
 | State | `CPlayerState` y `CEnemyState` con su sistema | main |
-| Service Locator | Servicios de configuraciones, imágenes y fuentes | main |
-| Escenas | Título y juego, con cambio de escena al final del cuadro | main |
+| Service Locator | Servicios de configuraciones, imágenes y fuentes. `session_service` con la ronda, el puntaje, el récord, las vidas y las continuaciones, que guarda y carga el récord en `hi_score.json` o en el almacenamiento local del navegador | main; `session_service` en PR 12 |
+| Escenas | Título y juego con la forma de la semana 5: cada escena tiene su mundo y sus ganchos `do_create`, `do_update`, `do_action`, `do_draw` y `do_clean`, pide el cambio con `switch_scene` y el motor lo hace al final del cuadro. La escena de juego recibe la ruta de su nivel, y `scenes.json` lista el título y los diez niveles. El título arma sus textos como entidades | PR 12 |
 | Configuración | Un JSON por tipo de entidad y uno por ronda, sin valores del juego en el código, sin comentarios ni docstrings | main |
 | Orden de dibujo | Capas del mundo en `window.json`, con el cuerpo de la base debajo de sus cañones y su núcleo | main |
 | Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON y la 6 cambia la alerta | main |
-| Pausa | Escena de pausa | Rama de Jerson |
+| Pausa | ESC o P pausan y reanudan la partida con una bandera de la escena de juego; en pausa solo parpadean las estrellas | PR 12. Ocultar entidades, texto "JUEGO PAUSADO" y menú de opciones: lo que sigue, con la escena de pausa de la rama de Jerson |
 | Pruebas | 50 pruebas sin ventana de `world_math`, el spawner y la máquina de estados de los enemigos | main |
 | Documentación | `README.md` con instrucciones, controles, modo trampa, pruebas y estructura | main |
+| Sonidos | `sounds_service` y `sounds.json` | Rama de Jerson |
 
 ## Bonos
 
