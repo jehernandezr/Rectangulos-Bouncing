@@ -832,17 +832,20 @@ class CChangingText:
 - Mapa conceptual: diseñador → experiencia → lugar → experiencia de juego → etc.
 - Cartas de lentes. Ejemplo: carta 17 (primera edición), lente del placer. Uso "dormir sobre la carta".
 - Audiencia por edad: 4 a 6 años juegan con sus padres y necesitan cambios de reglas. 25 a 35 años: casuales con familia y *hardcore gamers*.
-- Audiencia por género, según Schell: hombres, competencia, destrucción, retos espaciales, ensayo y error. Mujeres, emociones, mundo real, cuidar y crecer personajes, retos verbales, aprender con ejemplos. El video insiste en no discriminar: diseña para un público, pero prepárate para otros.
-- Otras clasificaciones: LeBlanc, 8 placeres; Bartle, 4 tipos. El video no las enumera. Por referencia general (no del video): LeBlanc = sensación, fantasía, narrativa, reto, compañerismo, descubrimiento, expresión y sumisión; Bartle = triunfadores, exploradores, socializadores y asesinos.
+- Audiencia por género, según Schell (diapositivas en [03:26] y [03:41]). Las 5 cosas que a los hombres les gusta ver: Maestría, Competencia, Destrucción, Acertijos espaciales, Prueba y error. Las 5 de las mujeres: Emoción, El mundo real, Nutrir, Acertijos de diálogo y verbales, Aprender mediante ejemplo. El video insiste en no discriminar: diseña para un público, pero prepárate para otros.
+- **Taxonomía de los placeres de LeBlanc** (diapositiva en [04:31]): Sensación (paisaje, música); Fantasía (entrar en un mundo imaginario); Narrativa (la secuencia de eventos que se desarrollan); Retos (que sea difícil); Compañerismo (amistades, cooperación, hacer parte de comunidades); Descubrimiento (encontrar cosas nuevas, secretos, estrategias); Expresión (expresarse como uno mismo, diseñar el personaje o un nivel); Sumisión (dejar el mundo real y entrar a uno nuevo más interesante).
+- Bartle (4 tipos) solo se nombra de palabra, sin diapositiva. Por referencia general (no del video): triunfadores, exploradores, socializadores y asesinos.
+- Rangos de edad de Schell (diapositiva en [02:46]): 0-3 infante; 4-6 preescolar; 7-9 niños; 10-13 preadolescente; 13-18 adolescente; 18-24 adulto joven; 25-35 veintes y treintas; 35-50 treintas y cuarentas; 50+ cincuentas y más.
+- La carta 17, el lente del placer, lleva impreso el número 179.
 
 **S5.2 Manejo de escenas**
 - Escena = entorno con lógica, controles y acciones distintos (entidades, sistemas, inputs).
 - Tipos: título, menú, juego principal, game over, video o animación.
 - Diseño OOP simple: `GameEngine` maneja lo común; `Scene` es una clase base "abstracta" que siempre se hereda (en el video se llama `BaseScene`; en el demo es `Scene`).
 - Cambios en el motor: diccionario de escenas, escena actual, nombre de escena a cambiar y `_handle_switch_scene()` al final del loop.
-- El video dice que `simulate` limpia muertos y luego actualiza. En el código es al revés: `do_update` primero y `_clear_dead_entities()` después.
+- El profesor lo explica como "limpiar muertos y luego actualizar", pero el código en pantalla (demo, [06:52]-[08:40]) y el ZIP coinciden: `do_update` primero y `_clear_dead_entities()` después. Vale el código.
 - Defensa del profesor: OOP no es "el demonio". Las escenas usan OOP por fuera y ECS por dentro, y siguen leyendo JSON.
-- Mundo real: Unity `.unity` (YAML), Unreal `level.umap`, Godot `.tscn` (los subtítulos dicen "tscene"; en Godot todo nodo puede ser una escena). Subescenas para mundos abiertos y MMO. Frameworks como XNA y HaxeFlixel también tienen escenas con un `switch`.
+- Mundo real: Unity `.unity` (YAML), Unreal `level.umap`, Godot `.tscn` (la diapositiva y los subtítulos dicen ".tscene", pero la extensión real es `.tscn`; en Godot todo nodo puede ser una escena). Subescenas para mundos abiertos y MMO. Frameworks como XNA y HaxeFlixel también tienen escenas con un `switch`.
 
 **S5.3 Gameloop avanzado**
 - Tiempo variable: `pos += vel * delta_time`. Problemas: túnel, falta de determinismo, flotantes distintos entre procesadores (ARM, Intel, AMD) y no aprovecha varios núcleos.
@@ -855,7 +858,7 @@ class CChangingText:
 - Motores grandes: `Update` (variable, para lo visual y suave) y `FixedUpdate` (fijo, para física y fuerzas). Unity recomienda `FixedUpdate` solo para física.
 - Dibujar y actualizar están desacoplados. Eso permite hilos, interpolar el dibujo entre pasos de física y usar la GPU.
 - Multijugador: evitar decimales. Por eso `clock.tick` devuelve milisegundos enteros, y Unreal usa enteros para rotaciones (según el video).
-- Unity: un solo hilo; hilo principal más hilo de render; *worker threads* con jobs; y jobs hablando directo con la GPU (consolas). El video asocia uno a WebGL y otro a móviles, pero el profesor dice "si no estoy mal": tómalo como aproximado.
+- Unity: un solo hilo; hilo principal más hilo de render; *worker threads* con jobs; y jobs hablando directo con la GPU (consolas). En la diapositiva ([17:41]) solo un modelo va ligado a una plataforma: los *graphics jobs* sin hilo de render, "usado en consolas (XBOX y PS)". Lo de WebGL y móviles es solo de palabra y el profesor dice "si no estoy mal". La diapositiva también lista otros problemas por resolver: interpolación, asincronía y los floats en multijugador.
 
 **Mapa del demo (`ECS_05_DEMO/`)**
 - `main.py`: `GameEngine().run("MENU_SCENE")`.
@@ -882,7 +885,7 @@ class CChangingText:
 | Hija | `do_draw`, `do_process_events` | Opcionales; ya traen comportamiento |
 
 **Detalles del demo que conviene saber**
-- `GameEngine._do_action` existe pero nadie lo llama. El input va por `Scene.do_process_events` → `system_input` → `self.do_action`.
+- `GameEngine._do_action` existe (el video lo escribe en [04:25], delegando a `current_scene.do_action`) pero nadie lo llama. El input va por `Scene.do_process_events` → `system_input` → `self.do_action`.
 - `FontsService.get` revisa `if path not in self._fonts`, pero guarda con la llave `(path, size)`. Por eso nunca encuentra la fuente y la vuelve a crear en cada llamada. Si lo copias, revisa `(path, size)`.
 - En `create_ball`, el ángulo aleatorio se sobrescribe con `random_angle = math.pi/2`: la bola siempre sale recto hacia abajo. Parece una prueba que quedó.
 - `system_block_count` corre aunque el juego esté en pausa. No afecta, porque el cambio solo se aplica al final del frame.
@@ -894,7 +897,7 @@ class CChangingText:
 - Estado global entre escenas: o una "escena global" que siempre corre, o un servicio en el Service Locator. Sugerencia directa: un servicio de estado del juego con vidas, puntaje y high score (guardar y cargar). Si hacen editor, un servicio de editor.
 - Un mundo ECS por escena. Al cambiar puedes limpiar todo (como el demo) o dejar la escena quieta y volver después, como una "foto" que sirve para *save states*. Otra opción es un componente con el id de escena, pero al profesor no le gusta.
 - Transiciones (fade): no le pongas transparencia a todos los sprites. Crea una entidad dedicada, un rectángulo del tamaño de la pantalla que se dibuja de último, con un componente tipo "fadeable" (alfa objetivo, velocidad con `delta_time`) y un sistema de fade. Al llegar al objetivo puede ejecutar un *callable* que haga `switch_scene`. La referencia se guarda en un servicio de estado del juego. Las transiciones de Bosconian parecen hechas con tiles animados.
-- Pantalla de Bosconian: 256x256 con barras negras de 24 px arriba y abajo, así que el alto real es 208. A la derecha va la interfaz (minimapa, ronda): el área jugable es aún menor (los subtítulos dicen "208 por 192"; conviene revisarlo en el documento del proyecto). La nave no queda en el centro real de la pantalla. Las estrellas no deben verse bajo la interfaz.
+- Pantalla de Bosconian: 256x256 con barras negras de 24 px arriba y abajo, así que el alto real es 208. A la derecha va la interfaz (minimapa, ronda): el área jugable es aún menor: en la imagen que muestra el profesor ([52:01]-[54:01]) el panel de interfaz mide 64 px de ancho, así que el área jugable queda en **192 de ancho por 208 de alto** (el 192 se midió en el fotograma, no aparece escrito). En [53:21] también aparece la tabla de puntos del original: asteroide 10, cosmo mina 20, I-type 50, P-type 60, E-type 70, nave espía ???, cañón 200, núcleo 1500. La nave no queda en el centro real de la pantalla. Las estrellas no deben verse bajo la interfaz.
 - Ideas para eso: varios sistemas de dibujo o capas; un offset de dibujo como propiedad del sprite (ahí sí, porque todos lo necesitan); o dibujar el área de juego en otra `Surface` y luego hacer `blit` a la pantalla. `pygame.SCALED` escala la ventana sin deformar los píxeles.
 - Hitboxes: cada entidad que choca debe tener su hitbox, no solo el rectángulo de la imagen.
 - Error común en entregas: el juego funciona, pero la arquitectura no. Mucha lógica en la escena que debería estar en sistemas o componentes.
@@ -1207,7 +1210,7 @@ def system_editor_draggable(world:esper.World, mouse_pos:pygame.Vector2):
 
 - Antes de esto arma `level["ball_start"]` y `level["paddle_start"]` con la misma forma, buscando `CTagBall` y `CTagPaddle`.
 - El diccionario tiene la misma forma que `level_01.json`. Por eso el archivo guardado se puede cargar con el mismo código. Esa simetría es la clave de serializar y deserializar.
-- Se guarda en `editor_level.json`, no encima de `level_01.json`. El juego sigue cargando `level_01.json` (ver `game_engine.py`). Para usar el nivel editado hay que copiarlo o renombrarlo a mano. Esto lo deduzco del código.
+- Se guarda en `editor_level.json`, no encima de `level_01.json`. El juego sigue cargando `level_01.json` (ver `game_engine.py`). En el video ([06:49]-[07:55]) el profesor lo resuelve cambiando en `game_engine.py` la ruta del nivel a `"assets/cfg/editor_level.json"`. En pantalla se ve también la errata "PRESS ENTER SO SAVE MAP" y, en [06:25], un `TypeError` por crear `MenuScene()` sin el motor, que se corrige en vivo.
 
 **Deserializar: recargar al crear la escena**
 
@@ -1279,10 +1282,10 @@ class DebugView(Enum):
 - Razón arquitectónica (pensar en datos) vs. razón de rendimiento (caché). Hay que conservar las dos.
 - No hace falta ECS puro: Unity y Unreal usan "EC" (lógica dentro del componente), y Godot usa nodos en jerarquía. ECS se vende sobre todo para proyectos muy demandantes.
 - Caché L1 < L2 < L3 < RAM. Hay caché de datos y de instrucciones. El CPU sube bloques vecinos a la caché.
-- Latencias citadas (Ryzen 3600): L1 "unos 9 ns" según el subtítulo, L2 2,8 ns, L3 10,3 ns, RAM 67 ns. El "9" casi seguro es 0,9 ns, porque L1 no puede ser más lenta que L2 y el profesor dice que la RAM es "casi 70 veces más lenta". Por confirmar en el video.
-- Tamaños de caché citados: 32 KB, "502 KB" y 16 MB. El 502 puede ser un error del subtítulo (quizás 512 KB).
-- Experimento 1: matriz 10.000 x 10.000, ~25 s por filas vs. ~42 s por columnas.
-- Experimento 2: lista de objetos ~2,5 s vs. lista de posiciones ~1,87 s.
+- Latencias (Ryzen 3600, AIDA64 en pantalla en [06:06]): L1 **0,9 ns**, L2 2,8 ns, L3 10,3 ns, RAM 67,4 ns. En pantalla: "casi 70 veces más lento entre L1 y Memoria".
+- Tamaños de caché (CPU-Z en [04:21]): L1 6 x 32 KB de datos + 6 x 32 KB de instrucciones; L2 6 x **512 KB**; L3 2 x 16 MB.
+- Experimento 1: `ROWS = COLUMNS = 10000`, ~25,3 s por filas vs. ~42,7 s por columnas.
+- Experimento 2 ([09:26]): `NUM_ENTS = 10000000` con posiciones `pygame.Vector3`; lista de objetos ~2,5 s vs. lista de posiciones ~1,87 s.
 - Un cache miss suele costar más que lo que ganas optimizando el algoritmo.
 - Recomendaciones: componentes pequeños, evitar herencia, una función para muchas instancias.
 - Python no controla la alineación. NumPy, los arreglos nativos de JS y `struct` en C# sí. esper usa listas y mapas.
@@ -1338,9 +1341,8 @@ Ojo con la propia demo: `_do_editor_action` y el guardado viven en `PlayScene`, 
 - Data locality: "Pitfalls of Object Oriented Programming" (GCAP 09, de las primeras presentaciones sobre DOD), "Data Oriented Design in C++" (marca la generación moderna de DOD; "controversial pero muy conocido") y "Data locality" de Game Programming Patterns (la explicación completa y rápida).
 - La página S6.4 apunta al sitio de la cohorte con la demo completa y aclara que el proyecto se puede estudiar y adaptar.
 
-**Por confirmar**
-- Las cifras de latencia y tamaño de caché (posibles errores del subtítulo).
-- Si el video de la demo explica cómo pasar `editor_level.json` a `level_01.json`. No usé el .mp4.
+**Confirmado con el video**
+- Resuelto con el video: las cifras de caché (ver arriba) y el uso del nivel editado (ver demo).
 
 ---
 
@@ -1547,7 +1549,8 @@ Módulo 7: juego emergente, perfilado y steering behaviours. Fuentes: subtítulo
   - **SnakeViz:** `snakeviz perfil.prof` abre una página web con la vista *sunburst* (anillos; el tamaño del anillo es el tiempo, la profundidad es la pila de llamadas) y la vista *icicle* (estalactita, la más común en perfiladores). Abajo hay una tabla con tiempo y número de llamadas por función. Ejemplos que muestra: `draw sprite` en el sistema de rendering y `pygame.display.flip`.
   - **memory-profiler** (necesita **matplotlib**): se corre el juego y luego `mprof plot` muestra la memoria en el tiempo. Una curva en escalera que no baja indica una fuga (*leak*). Su juego arranca en unos 80 MB, casi todo del runtime de Python.
   - **GPU:** no hay perfilador en Python. Menciona herramientas externas.
-  - Inseguro: los subtítulos no dictan los comandos completos. La forma estándar sería `python -m cProfile -o perfil.prof main.py`, `pip install snakeviz memory-profiler matplotlib` y `mprof run main.py`; esto es uso habitual de las herramientas, no una cita de la clase.
+  - Comandos tal como salen en pantalla ([05:01], [08:36], [12:31]): `python -m cProfile -o perfil.prof .\main.py`, `snakeviz perfil.prof`, `python -m mprof run .\main.py` y `python -m mprof plot`.
+  - Resultados en pantalla con un clon de Galaxian del profesor: con `clock.tick` limitando, `tick` se lleva 30,6 s (89,03 %); en otra corrida, `system_rendering` se lleva 39,2 s (74,15 %), marcado como "GPU BOUND".
 - **Trampa de `clock.tick`:** con un framerate, `tick` espera a propósito para no pasar de ese límite, y en el perfil aparece ocupando casi todo. El profesor dice que incluso `tick(0)` sigue esperando (él lo llama posible error de pygame). Para perfilar: llamar `tick()` **sin argumento**. En el motor del demo eso sería `_calculate_time` → `self._clock.tick(self._framerate)`. Solo para perfilar; al publicar conviene volver a limitar el framerate para evitar `delta_time` grandes.
 - **Flujo de trabajo:** (1) perfila solo si hay un problema; evita la optimización prematura. (2) Identifica el cuello de botella: ¿CPU o GPU *bound*? En el demo, ¿`update` o `draw`? (3) Optimiza solo esa parte. Su ejemplo de clase quedó GPU *bound*: el sistema de rendering era lo más pesado.
 - **Optimizaciones básicas:** algoritmos eficientes (solo tras encontrar el cuello); sistemas reutilizables (optimizar `system_movement` o el rendering mejora a todas las entidades); usar `get_components` en vez de pedir componentes uno a uno dentro del bucle; evitar asignaciones de memoria y estructuras grandes; ser amigo de la caché (por eso ECS y DOD ayudan).
@@ -1563,6 +1566,8 @@ Módulo 7: juego emergente, perfilado y steering behaviours. Fuentes: subtítulo
 - **Huir (flee):** igual que buscar con la dirección deseada negada.
 - **Llegar (arrive):** reducir la fuerza a medida que se acerca y definir una distancia mínima; al llegar, detener. Sin esto, "buscar" tiembla alrededor del objetivo.
 - Otros nombrados (plugin gratis de Unreal 5): wander (vagar), evade (evadir), collision avoidance (no es lo mismo que huir), leader following, path following, flocking. Plugins citados: Polarith (Unity) y comportamientos "mover a" en Construct.
+
+**El video de la demo vs. el ZIP** ([04:37]-[08:10]): en el video la atracción se atenúa al acercarse, con `follow_dampening = good_block_dist/100` y `desired_good_length = min(follow_force, follow_force/follow_dampening)`, y en [06:10] agrega `"arrive_distance": 10` a `ball.json`. El ZIP no trae nada de eso: usa `follow_force` fijo. El `lerp` final con `delta_time * 5` es igual en ambos.
 
 **Qué implementa realmente el demo** (para no confundir):
 - **Sí:** buscar (`follow_vector`) y huir con atenuación por distancia (`avoid_vector`), sumados y suavizados con `lerp`.
