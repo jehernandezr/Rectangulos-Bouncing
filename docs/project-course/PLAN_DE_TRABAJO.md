@@ -1,6 +1,6 @@
 # Plan de trabajo del proyecto final: Bosconian (Sharp X68000)
 
-Este documento reúne, en un solo lugar, todo lo que el grupo necesita para construir y entregar el proyecto final del curso. Primero resume lo que nos piden. Después describe lo que ya existe en el repositorio y lo que conviene xcorregir, explica cómo se comporta el juego original con todos sus números y organiza el trabajo en etapas que crecen de a poco. Así, los cuatro integrantes pueden avanzar en paralelo sin bloquearse entre sí. Al final hay una lista de verificación y dos anexos con la posición exacta de las bases y de los obstáculos de cada ronda.
+Este documento reúne, en un solo lugar, todo lo que el grupo necesita para construir y entregar el proyecto final del curso. Primero resume lo que nos piden. Después describe lo que ya existe en el repositorio y lo que conviene corregir, explica cómo se comporta el juego original con todos sus números y organiza el trabajo en etapas que crecen de a poco. Así, los cuatro integrantes pueden avanzar en paralelo sin bloquearse entre sí. Al final hay una lista de verificación y dos anexos con la posición exacta de las bases y de los obstáculos de cada ronda.
 
 Todo lo que este documento dice sobre el juego original salió de jugarlo y medirlo en el emulador del curso, cuadro a cuadro y sin sonido, y de revisar dos videos de referencia. El original corre a 55,46 cuadros por segundo. Por eso los tiempos de este documento están convertidos a segundos y las velocidades a píxeles por segundo, para que se puedan usar directamente con el delta time del motor.
 
@@ -60,6 +60,8 @@ Los bonos suman hasta un 10 % adicional sobre la nota, y el grupo los hace todos
 8. segunda habilidad no letal;
 9. nivel jefe;
 10. modo editor.
+
+El modo editor vale por dos bonos, como dijo el profesor en la sesión del 4 de noviembre, y el curso lo enseña paso a paso en la semana 6. Por eso el frente B lo empieza apenas cierre sus obligatorios, sin esperar a los demás bonos.
 
 ### 1.4 Entregables y su peso en la nota
 
@@ -135,39 +137,35 @@ El modo trampa es de todos: el frente A construye el mecanismo y cada frente agr
 
 ## 3. Lo que ya existe en el repositorio
 
-El repositorio es `dso-uniandes/bosconian`, en la rama `main`. Daniel lo creó y hasta hoy tiene once commits. La copia local está al día con el remoto, y no hay otras ramas ni pull requests.
+El repositorio es `dso-uniandes/bosconian`, en la rama `main`. Al 14 de noviembre lleva 91 commits y once pull requests unidos.
 
 ### 3.1 Lo que está hecho y se conserva
 
-- **Game loop asíncrono con delta time**, en `src/engine/game_engine.py`. Ya usa `async def run` y `await asyncio.sleep(0)`, que es lo que necesita la versión web con pygbag.
-- **Service Locator** en `src/engine/service_locator.py`, con servicios de configuración, imágenes y fuentes. Solo hay que sumarle el servicio de sonidos.
-- **Patrón Escena**: una clase base `Scene` con `create`, `do_events`, `update` y `draw`, más una escena de título y una de juego, con cambio de escena desde el motor.
-- **Patrón Command**: el componente `CInputCommand` y un sistema que traduce las teclas en acciones.
-- **Fondo de estrellas con parpadeo**, en `c_star.py` y `s_star_twinkle.py`.
-- **Jugador** con el recorte correcto de la hoja de sprites y una cámara que lo sigue.
-- **Esper dentro del repositorio**, en la carpeta `esper/`, lo que facilita la versión web.
-- **Recursos**: la hoja de sprites `naves.png`, el logo `titulo.png`, la fuente PressStart2P y ocho pistas de música en OGG.
+- **Game loop asíncrono con delta time**, en `src/engine/game_engine.py`. Usa `async def run` y `await asyncio.sleep(0)`, limita el delta time con `min_framerate` y cambia de escena al final del cuadro.
+- **Lienzo de 256 x 208** escalado a mano al tamaño de la ventana, sin `pygame.SCALED`, y `import pygame` en `main.py`, que es lo que pide pygbag.
+- **Service Locator** con servicios de configuración, imágenes y fuentes.
+- **Escenas**: `TitleScene` y `GameScene(engine, round_number)`, que lee `levels/level_NN.json`.
+- **Patrón Command**: `CInputCommand`, `system_input_event` y `system_input_commands`, con las teclas en `input.json`.
+- **Mundo de 1024 x 1536 que da la vuelta**, cámara que sigue al jugador, estrellas con parallax y parpadeo, y minimapa.
+- **Jugador** con 8 direcciones, aceleración, disparo, EXTRA CANNON y estados con `CPlayerState`.
+- **Modo trampa** con `CCheatMode` y su indicador en el panel.
+- **Niveles**: `levels/level_01.json` a `level_10.json`, generados con `tools/gen_levels.py`, y el componente `CHitbox`.
+- **Rocas, minas y bases** con sus cañones y su núcleo, cada pieza como una entidad.
+- **Enemigos I y P** con su spawner y su máquina de estados, **alertas** y **puntaje**, con pruebas que corren sin ventana en `tests/`.
+- **Archivos del proyecto**: `README.md`, `requirements.txt` (pygame-ce, pygbag y pytest) y `.gitignore`.
 
-Las convenciones que ya existen en el código se mantienen: nombres en inglés, funciones `create_*` para crear entidades, los métodos `create` y `do_events` de las escenas y el componente `CInputCommand`. El plan se adapta a ellas en lugar de pedir que se reescriba lo que ya funciona. A esas convenciones se suman dos del curso que llegan con las tareas nuevas: las etiquetas en `src/ecs/components/tags/` y un sistema de colisión por cada par de cosas que chocan (sección 4.1).
+Las convenciones que ya existen en el código se mantienen: nombres en inglés, funciones `create_*` para crear entidades, el componente `CInputCommand` y las etiquetas en `src/ecs/components/tags/`.
 
-### 3.2 Lo que conviene corregir antes de construir encima
+### 3.2 Ajustes de arquitectura antes de seguir construyendo
 
-Estos ajustes son pequeños, pero van primero porque todo lo demás se apoya en ellos. Cada punto explica el motivo.
+El curso califica la arquitectura además del juego, y su lista de malos olores de ECS es la vara con la que se revisa el código. Estos ajustes alinean lo que existe con esa lista y con los patrones de las semanas 4 a 6. Van primero porque las escenas nuevas se construyen encima.
 
-1. **Resolución.** `window.json` define 320 x 256, y el enunciado fija 256 x 208. El área de juego mide 192 píxeles de ancho y el panel derecho 64. El fondo pasa a negro, como en el original, y el título de la ventana pasa a "COSMONIAN".
-2. **Escalado de la ventana.** El motor abre la ventana con `pygame.SCALED`, una opción que rompe la versión web. La solución es dibujar todo en un lienzo de 256 x 208 y escalarlo a mano al tamaño de la ventana.
-3. **`import pygame` en `main.py`.** Pygbag necesita ver ese import en el archivo principal para empaquetar Pygame. Sin él, la versión web falla al arrancar.
-4. **Movimiento del jugador.** Hoy la nave gira de forma continua a 180 grados por segundo y suma la velocidad como un vector. En el original, la nave se mueve en **8 direcciones con giro instantáneo** y conserva la velocidad al girar (sección 5.3).
-5. **Mundo y cámara.** Hoy la cámara centra la ventana completa y los objetos se dibujan con un módulo de pantalla. El juego necesita un **mundo de 1024 x 1536 píxeles que da la vuelta** en ambos ejes, una cámara centrada en el área de juego de 192 píxeles y una función que convierta coordenadas del mundo a la pantalla teniendo en cuenta esa vuelta.
-6. **Estrellas.** Las estrellas se configuran solo en `stars.json`, y `world.json` guarda el tamaño del mundo. Las estrellas se mueven a la mitad de la velocidad de la cámara, parpadean con transparencia de 0 a 255 y en los menús caen de arriba hacia abajo.
-7. **Cambio de escena.** Hoy el cambio ocurre en el mismo instante en que se pide. Pasa a hacerse al final del cuadro, para no destruir el mundo de Esper mientras un sistema lo está recorriendo.
-8. **Tecla ESC.** En la escena de juego, ESC vuelve al título. En el original, ESC es la **pausa**.
-9. **Archivos del proyecto.** Se agregan `requirements.txt` (con pygame y pygbag), un `README.md` (cómo correr el juego, controles y modo trampa) y un `.gitignore` (con `build/`, `__pycache__/` y los entornos virtuales).
-10. **Restos de los ejercicios.** El sistema `s_screen_bounce.py` viene de los ejercicios y el juego lo deja sin uso, así que se elimina.
-11. **Sonidos.** Los recursos del curso traen música, pero ningún efecto de sonido. Todos los efectos se crean con https://sfxr.me/, la herramienta que recomienda el enunciado, y se convierten a OGG (sección 5.19). Los sonidos de los ejercicios quedan fuera, porque no traen una licencia que confirme que son de uso libre.
-12. **Acceso del curso.** Hoy los colaboradores son los integrantes. Hay que invitar a los profesores y monitores, como pide el enunciado.
-
----
+1. **Interfaz de escena del curso.** Hoy la clase `Scene` solo trae `create`, `do_events`, `update` y `draw`, y el motor conoce cada escena concreta con `change_to_title` y `change_to_game`. Pasa a la forma del curso, descrita en la sección 4.2: la escena es dueña de su mundo de Esper, el motor guarda las escenas por nombre y cada escena pide el cambio con `switch_scene("NOMBRE")`.
+2. **El motor solo administra escenas.** Hoy `GameEngine` carga `player.json`, `bullet.json`, `obstacles.json`, `input.json` y otros, y las escenas los leen con `self.engine.player_cfg`. El motor se queda con la ventana, el reloj y las escenas. Cada escena y cada prefab piden su JSON a `ServiceLocator.configs_service`, que ya guarda en caché lo que carga.
+3. **El estado de la partida es un servicio.** `GameSession` vive hoy en el motor. Pasa a ser `ServiceLocator.session_service`, con el puntaje, el récord, las vidas, la ronda y las continuaciones, y con los métodos para guardar y cargar el récord. Es lo que sugirió el profesor en la sesión del 4 de noviembre: lo que sobrevive a los cambios de escena va en un servicio.
+4. **Servicio de sonidos.** Se suma `ServiceLocator.sounds_service`, con caché como el de imágenes. Los sistemas reproducen los sonidos por su nombre de `sounds.json`.
+5. **Toda tecla pasa por Command.** Hoy `GameScene.do_events` revisa la tecla de volver con un `if` directo. Esa tecla y la pausa (ESC y P) pasan a ser comandos de `input.json`, que la escena atiende en `do_action`. ESC deja de volver al título y pasa a ser la pausa, como en el original.
+6. **Acceso del curso.** Confirmar que los profesores y monitores tienen acceso al repositorio, como pide el enunciado.
 
 ## 4. La arquitectura que vamos a construir
 
@@ -184,18 +182,31 @@ El juego se construye con ECS sobre Esper, igual que los ejercicios del curso. E
 5. **Un prefab arma una entidad.** Es una función `create_*` en `src/create/prefab_creator.py` que lee los datos de la configuración y le pone a la entidad sus componentes y su etiqueta. El prefab también traduce los datos del JSON a los valores iniciales de los componentes. El curso guarda en `CTransform` la esquina y la calcula con `position - size / 2`; aquí `CTransform` guarda el centro, porque la nave gira y su sprite cambia de tamaño en cada giro, y es `system_rendering` el que resta medio sprite al dibujar cualquier entidad.
 6. **Cada tipo de entidad tiene su JSON y cada ronda dice dónde va cada cosa.** El JSON de la entidad (`player.json`, `obstacles.json`, `bases.json`) trae el sprite, el tamaño de la hitbox y sus valores fijos. El JSON de la ronda (`levels/level_NN.json`) trae las posiciones y los valores que cambian de una ronda a otra. Así lo hace el curso con `player.json` y `level_01.json`.
 7. **Lo que pasa con el tiempo es una entidad más, con su componente y su sistema.** Es el patrón del spawner del curso: `CEnemySpawner` guarda los tiempos y `system_enemy_spawner` crea los enemigos cuando toca. Lo mismo vale para las alertas, el espía y las formaciones.
-8. **Cada par de cosas que chocan tiene su propio sistema de colisión.** Como en el curso, con `system_collision_bullet_enemy` y `system_collision_player_enemy`: el sistema pide las dos etiquetas, arma los rectángulos con `CTransform` y `CHitbox` y usa `colliderect`.
+8. **Cada par de cosas que chocan tiene su propio sistema de colisión, y todos comparten la misma ayuda.** Como en el curso, con `system_collision_bullet_enemy` y `system_collision_player_enemy`: el sistema pide las dos etiquetas y decide qué pasa. Armar los rectángulos con `CTransform` y `CHitbox` y recorrer los pares que se tocan lo hace una sola función común, así cada sistema queda en pocas líneas y solo contiene su resultado. Copiar un sistema y cambiarle dos líneas es uno de los malos olores que revisa el curso.
 9. **Las máquinas de estados guardan el estado en un componente y la lógica en un sistema.** Es el patrón State del curso: `CPlayerState` guarda el estado y `system_player_state` decide los cambios.
 10. **Los sistemas se avisan con componentes, en lugar de llamarse entre sí.** Un sistema marca un dato, como `CAnimation.completed` en el curso, o crea una entidad de evento de un solo cuadro, y otro sistema la lee y la borra.
 11. **Las entidades se borran de forma diferida**, con `world.delete_entity` dentro de los sistemas y `world._clear_dead_entities()` al final de cada cuadro.
+12. **La escena solo arma el mundo y llama a los sistemas.** Si el `update` o el `draw` de una escena empieza a llenarse de cálculos, preguntas y asignaciones, eso pide un componente y un sistema nuevos. La lógica propia del juego vive en los sistemas, y cuando algo falla se busca ahí.
+13. **Toda tecla es un comando.** Las teclas se declaran en `input.json`, se convierten en entidades con `CInputCommand` y la escena las atiende en `do_action`. Ninguna escena ni ningún sistema pregunta por una tecla directamente.
+14. **Lo que vale para todo el juego es un servicio.** Configuraciones, imágenes, fuentes, sonidos y el estado de la partida se piden al `ServiceLocator`. El motor no guarda configuraciones del juego.
+15. **Los enemigos se mueven con steering.** Es la técnica de la semana 7 del curso, y el profesor la recomendó para todos los enemigos móviles de Bosconian: el sistema calcula la velocidad deseada hacia el objetivo y corrige la velocidad actual hacia ella poco a poco, con un límite de giro. El giro limitado del I y del P ya sigue esa idea. La formación suma una fuerza de separación para que las naves no se encimen.
 
 ### 4.2 Motor, escenas y servicios
 
-- **Motor (`GameEngine`)**: corre el game loop, calcula el delta time con un tope de 1/30 de segundo para que nada atraviese un objeto en un cuadro lento, y le pasa el control a la escena activa.
-- **Escenas**: intro, título, opciones, instrucciones, créditos, modo atractor, cutscene, juego, pausa, game over, felicitación de récord, victoria, editor y jefe. La pausa se apila sobre la escena de juego, que queda intacta debajo. Cada escena tiene su propio mundo de Esper y crea sus entidades en `create()` llamando a los prefabs.
-- **Escena de juego**: recibe el número de la ronda al crearse, con `GameScene(engine, round_number)`, lee `levels/level_NN.json` con el servicio de configuraciones y crea las entidades de la ronda con los prefabs.
-- **Servicios del Service Locator**: configuraciones, imágenes, fuentes y sonidos. Se cargan una sola vez y se piden por nombre. Los sistemas reproducen los sonidos con `ServiceLocator.sounds_service.play(...)`, como en la semana 4 del curso.
-- **Sesión de juego (`GameSession`)**: un objeto que sobrevive a los cambios de escena y guarda el puntaje, el récord, las vidas, la ronda actual y las continuaciones usadas. Es la única fuente de esos datos. Cuando exista, el motor toma de ahí la ronda que le pasa a la escena de juego.
+Esta parte sigue la forma del patrón Escena que enseña el curso en la semana 5.
+
+- **Motor (`GameEngine`)**: corre el game loop, calcula el delta time con un tope de 1/30 de segundo para que nada atraviese un objeto en un cuadro lento, guarda las escenas en un diccionario por nombre y le pasa el control a la escena activa. Su papel es administrar la ventana, el dibujo final y las escenas. No carga configuraciones del juego ni guarda datos de la partida.
+- **Cambio de escena**: una escena pide el cambio con `switch_scene("NOMBRE")`, que solo anota el nombre. El motor hace el cambio al final del cuadro: limpia la escena actual con `clean()`, toma la nueva del diccionario y llama a su `create()`.
+- **Clase base `Scene`**: es dueña de su mundo, `self.ecs_world = esper.World()`, uno por escena. Trae `simulate(delta_time)`, que llama a `do_update` y luego borra las entidades muertas, y `clean()`, que vacía el mundo y llama a `do_clean`. Cada escena hija llena sus ganchos: `do_create`, `do_update`, `do_action`, `do_draw` y `do_clean`. `do_action` recibe los comandos del patrón Command.
+- **Escenas**: intro, título, opciones, instrucciones, créditos, modo atractor, cutscene, juego, game over, felicitación de récord y victoria. Cada escena crea sus entidades en `do_create` llamando a los prefabs.
+- **Escena de juego**: recibe la ruta del nivel al crearse, como `PlayScene("assets/cfg/level_01.json")` en el curso. Así la misma escena juega las diez rondas, el nivel jefe (`level_boss.json`) y los niveles del editor, porque todos tienen el mismo formato.
+- **Pausa**: es una bandera dentro de la escena de juego, como en la demostración del curso. Con la pausa activa, `do_update` deja de correr los sistemas de juego y solo corren el parpadeo de las estrellas y el menú de pausa. Un sistema oculta a los enemigos, al jugador y los íconos del minimapa con `CVisible`, y los vuelve a mostrar al reanudar. El menú de opciones de la pausa son entidades de la misma escena.
+- **Modo editor**: es otra bandera de la escena de juego, como en la demostración de la semana 6. Con el editor activo corren los sistemas del editor y se detienen los de juego.
+- **Servicios del Service Locator**: configuraciones, imágenes, fuentes, sonidos, el estado de la partida y el editor. Se cargan una sola vez y se piden por nombre.
+  - `configs_service`: cada escena y cada prefab piden aquí su JSON.
+  - `sounds_service`: los sistemas reproducen los sonidos con `ServiceLocator.sounds_service.play(...)`, como en la semana 4 del curso.
+  - `session_service`: guarda el puntaje, el récord, las vidas, la ronda actual y las continuaciones usadas. Sobrevive a los cambios de escena y es la única fuente de esos datos. Guarda y carga el récord.
+  - `editor_service`: guarda lo que el editor tiene seleccionado (qué pieza se va a poner y dónde) mientras el editor está activo, como sugirió el profesor en la sesión del 4 de noviembre.
 
 ### 4.3 Componentes y etiquetas
 
@@ -207,6 +218,7 @@ Los componentes son datos simples, sin lógica. Estos son los que necesita el ju
 - **Bases**: `CBase` (cañones que le quedan; la orientación queda en el sprite girado y en la hitbox del núcleo), `CCannon` (su base, su desfase y su recarga) y `CCore` (su base y los tiempos de abierto y cerrado).
 - **Temporizadores de la ronda**: `CEnemySpawner` (aparición de enemigos), `CAlert` (condición base y superposiciones de formación y espía), `CSpySpawner`, `CFormationSpawner` e `CItemSpawner`, cada uno en una entidad propia.
 - **Eventos de un solo cuadro**: `CEventBaseDestroyed`, `CEventPlayerDied`, `CEventSpyResolved` y `CPointsAward`. Un sistema crea la entidad del evento, otro la lee y la borra en el mismo cuadro.
+- **Editor**: `CEditorDraggable` (la pieza se puede arrastrar), `CEditorPlacer` (qué pieza va a colocar el cursor) y `CEditorFollowMouse` (el cursor sigue al ratón), como en la demostración de la semana 6.
 - **Etiquetas** (clases vacías en `components/tags/`): `CTagPlayerBullet`, `CTagEnemy`, `CTagSpy`, `CTagEnemyBullet` (bala de cañón y misil E), `CTagCannon`, `CTagCore`, `CTagRock`, `CTagMine`, `CTagIndestructibleRock`, `CTagMineExplosion`, `CTagExplosion`, `CTagItem` y `CTagHud`. El jugador se reconoce por su componente `CPlayer`.
 
 ### 4.4 Sistemas y su orden
@@ -222,11 +234,13 @@ En cada cuadro de la partida los sistemas corren en este orden. Cada grupo nombr
 7. **Bases**: `system_base_activation`, `system_core_state` y `system_cannon_fire`.
 8. **Colisiones**, un sistema por par, con los nombres de la sección 5.15.
 9. **Reglas**: `system_alerts`, `system_score`, `system_base_destroyed` y `system_round_progress`.
-10. **Cierre del cuadro**: `system_animation`, `system_explosion_kill`, `system_minimap` y `system_hud`, y al final `world._clear_dead_entities()`.
+10. **Cierre del cuadro**: `system_animation`, `system_explosion_kill`, `system_minimap` y `system_hud`. Al final, `simulate` borra las entidades muertas.
 
 Al dibujar, `system_star_rendering` pinta las estrellas en coordenadas de pantalla y después `system_rendering` pinta el mundo. Este último usa `wrapped_delta` (`src/engine/world_math.py`), que da la distancia más corta entre dos puntos en un mundo que da la vuelta, y ubica cada entidad respecto al centro de la cámara.
 
-Mientras el jugador está muriendo, la escena salta los grupos 3, 4, 5 y 9, pero las animaciones siguen.
+Mientras el jugador está muriendo, la escena salta los grupos 3, 4, 5 y 9, pero las animaciones siguen. En pausa corren solo el parpadeo de las estrellas y el menú de pausa. En el modo editor corren `system_editor_follow_mouse` y `system_editor_draggable` en lugar de los grupos 2 a 9.
+
+**Vistas de depurado**: un comando rota entre la vista normal, la de hitboxes y la de velocidades. Cada vista es su propio sistema de dibujo, `system_rendering_debug_rects` y `system_rendering_debug_velocity`, que corre después de `system_rendering`. La de hitboxes dibuja el rectángulo de cada `CHitbox`, y la de velocidades dibuja una línea con la dirección y la rapidez de cada `CVelocity`. Así lo muestra la demostración de la semana 6, y sirven para revisar choques y persecuciones sin `print`.
 
 ### 4.5 Archivos de configuración
 
@@ -236,7 +250,7 @@ Cada tipo de entidad tiene su archivo, con el sprite, el tamaño de su hitbox y 
 |---|---|
 | `window.json` | Resolución de 256 x 208, área de juego de 192 x 208 (la escena de juego dibuja el mundo en esa parte de la pantalla), título, fondo negro, cuadros por segundo, el mínimo de cuadros por segundo que limita el delta time (`min_framerate`), el nombre de la capa de interfaz (`ui_layer`) y el orden de las capas del mundo (`world_layers`) |
 | `world.json` | Tamaño del mundo, 1024 x 1536 |
-| `session.json` | Valores con que empieza cada partida, como la primera ronda. `GameSession` los toma de aquí |
+| `session.json` | Valores con que empieza cada partida, como la primera ronda. `session_service` los toma de aquí |
 | `player.json` | Sprite, hitbox de 12 x 12, aceleración, vectores de las 8 direcciones, vidas y EXTRA CANNON |
 | `bullet.json` | Sprites de la bala del jugador, su hitbox de 2 x 2, su velocidad y la cadencia de disparo |
 | `bases.json` | Sprites del cuerpo, los cañones y el núcleo; hitbox del cañón de 16 x 16, del núcleo de 16 x 2 (base H) o 2 x 16 (base V) y de la bala de cañón de 6 x 6; posición de los cañones y sus abanicos de tiro |
@@ -470,7 +484,7 @@ Cada fila de esta tabla es **un sistema de colisión propio**, como en el curso.
 | `system_collision_enemy_bullet_obstacle` | Bala de cañón con roca o mina | Mueren las dos y el jugador suma los puntos |
 | `system_collision_indestructible_base` | Roca indestructible con cañón o núcleo | La roca rebota |
 
-Toda colisión produce una explosión con el prefab `create_explosion`, y la del jugador produce varias. Para que el juego vaya rápido en el navegador, lo que no se mueve (obstáculos, cañones y núcleos) se guarda al cargar la ronda en una cuadrícula de celdas de 32 píxeles. La cuadrícula vive en el componente `CCollisionGrid` de una entidad propia, y los sistemas de colisión solo revisan los objetos de las celdas cercanas.
+Toda colisión produce una explosión con el prefab `create_explosion`, y la del jugador produce varias. Para que el juego vaya rápido en el navegador se mide primero, como enseña la semana 7 del curso: `python -m cProfile -o perfil.prof .\main.py` y luego `snakeviz perfil.prof` muestran en qué se va el tiempo. Si las colisiones pesan, lo que no se mueve (obstáculos, cañones y núcleos) se guarda al cargar la ronda en una cuadrícula de celdas de 32 píxeles. La cuadrícula vive en el componente `CCollisionGrid` de una entidad propia, y la función común de colisión solo revisa los objetos de las celdas cercanas.
 
 ### 5.16 Puntaje y récord
 
@@ -584,7 +598,7 @@ La tecla `0` activa o desactiva el modo trampa, que empieza desactivado. Mientra
 
 | Tecla | Acción | Tecla | Acción |
 |---|---|---|---|
-| 1 | Subir de ronda | Mayús + 1 | Mostrar las hitboxes |
+| 1 | Subir de ronda | Mayús + 1 | Rotar las vistas de depurado (normal, hitboxes y velocidades) |
 | 2 | Bajar de ronda | Mayús + 2 | Lanzar un espía |
 | 3 | Invulnerabilidad | Mayús + 3 | Lanzar una formación |
 | 4 | Activar el EXTRA CANNON | Mayús + 4 | Crear el ítem de la segunda habilidad |
@@ -646,14 +660,19 @@ Esta tabla reúne todos los valores que cambian de una ronda a otra. Las posicio
   - Cuando le quedan 5 impactos o menos, entra en una segunda fase: abierto 2,2 segundos y los cañones disparan un 25 % más seguido.
 - Sus cañones valen 200 y reaparecen a los 10 segundos, pero no lo matan. Vencer al jefe vale 5000 puntos.
 - El campo de obstáculos es el de la ronda 10, sin minas a menos de 200 píxeles del jefe. Usa los parámetros de la ronda 10 y la música "confrontation".
+- Es un nivel más, `level_boss.json`, que juega la misma escena de juego. Lo propio del jefe (impactos, fases y abanico de misiles) va en un componente `CBoss` y en `system_boss`.
 
 **Modo editor**
 
-- Se entra y se sale con una tecla durante el juego (Mayús + 9 en modo trampa, y también desde el menú de opciones).
+Sigue la receta de la demostración de la semana 6 del curso: una bandera de modo editor dentro de la escena de juego, componentes de editor en las piezas y sistemas de editor que solo corren con la bandera activa.
+
+- Se entra y se sale con una tecla durante el juego (Mayús + 9 en modo trampa, y también desde el menú de opciones). Al entrar se detienen los sistemas de juego.
+- Cada pieza que el editor puede mover lleva `CEditorDraggable`. El cursor es una entidad con `CEditorFollowMouse` y `CEditorPlacer`, que indica qué pieza va a colocar.
+- `system_editor_follow_mouse` mueve el cursor con el ratón y `system_editor_draggable` arrastra la pieza que está debajo. Lo seleccionado vive en `editor_service`.
 - Tiene una cámara libre y una rejilla.
 - Permite colocar bases horizontales o verticales, rocas y minas, y mover el punto de partida del jugador.
 - Permite elegir la dificultad (los valores de una de las diez rondas), la música y si la ronda tiene EXTRA CANNON.
-- Guarda y carga niveles con el mismo formato que los niveles del juego: en escritorio en un archivo y en la web en el almacenamiento local del navegador.
+- Guarda y carga niveles con el mismo formato que los niveles del juego: en escritorio en un archivo y en la web en el almacenamiento local del navegador. Guardar es serializar: se recorren las piezas con sus componentes y se escribe el JSON del nivel. Cargar es lo mismo que empieza una ronda, porque la escena de juego recibe la ruta del nivel.
 
 ---
 
@@ -687,9 +706,9 @@ Cada tarea dice qué se construye, de qué depende y cómo se comprueba que est�
 El objetivo es que todos trabajen sobre los mismos cimientos y con los mismos nombres. La etapa es corta y casi todo se hace en paralelo, porque los frentes B, C y D trabajan en archivos nuevos, separados del motor.
 
 **Frente A (Daniel)**
-1. Aplicar las correcciones 1 a 10 de la sección 3.2.
-   - *Listo cuando:* el juego abre en escritorio con un lienzo de 256 x 208 escalado y la versión web de pygbag arranca en el navegador.
-2. Crear `GameSession`, la capa de dibujo que separa el mundo de la interfaz y el mecanismo del modo trampa (la tecla `0` y el registro de acciones).
+1. Aplicar los ajustes 1 a 5 de la sección 3.2: interfaz de escena del curso, motor que solo administra escenas, `session_service`, `sounds_service` y teclas por Command.
+   - *Listo cuando:* el juego abre en escritorio y en la web, `GameEngine` ya no carga configuraciones del juego y ESC pausa la partida.
+2. Crear la capa de dibujo que separa el mundo de la interfaz, el mecanismo del modo trampa (la tecla `0` y el registro de acciones) y las vistas de depurado de la sección 4.4.
    - *Listo cuando:* la escena de juego dibuja un texto de prueba en el panel que no se mueve con la cámara, y la tecla `0` muestra "CHEAT".
 3. Publicar el primer borrador en itch.io como página privada, para comprobar desde el inicio que la publicación web funciona.
 
@@ -720,7 +739,7 @@ Al terminar esta etapa, la nave vuela por la ronda 1 con el mundo, las estrellas
    - *Listo cuando:* en la ronda 1 la nave llega a 65,9 px/s en unos 1,4 segundos, gira al instante en 8 direcciones y dispara pares de balas como en el original.
 
 **Frente B** (depende de su tarea 0.1)
-1. **Carga de niveles**: `GameScene(engine, round_number)` lee `levels/level_NN.json` con el servicio de configuraciones, y `create_player` pone la nave en el inicio de la ronda con su velocidad máxima.
+1. **Carga de niveles**: la escena de juego recibe la ruta de `levels/level_NN.json` y la lee con el servicio de configuraciones, y `create_player` pone la nave en el inicio de la ronda con su velocidad máxima.
 2. **Rocas y minas**: los prefabs `create_rock` y `create_mine` arman cada obstáculo con `CTransform`, `CSurface`, `CHitbox` y su etiqueta (`CTagRock` o `CTagMine`), con los datos de `obstacles.json`. Las luces de las minas se animan con `CAnimation` y `system_animation`, como en la semana 3 del curso.
 3. **Bases**: el prefab `create_base` arma el cuerpo, los seis cañones y el núcleo, horizontales o verticales, cada pieza como una entidad con su componente (`CBase`, `CCannon` o `CCore`), su `CHitbox` y su etiqueta, con los datos de `bases.json`.
    - *Listo cuando:* la ronda 1 muestra su base y sus 104 obstáculos donde indica el anexo, y el minimapa marca la base.
@@ -747,6 +766,7 @@ Al terminar esta etapa se puede jugar cualquier ronda con todas sus reglas, perd
 3. **Núcleo y misil E** según la sección 5.8, con el patrón State: `CCoreState` guarda si está abierto o cerrado y `system_core_state` lo cambia y lanza el misil.
 4. **Destrucción de bases** según la sección 5.6: el sistema de colisión crea un evento `CEventBaseDestroyed`, y `system_base_destroyed` borra la base completa y da los puntos.
    - *Listo cuando:* una prueba sin ventana confirma que una bala por el eje del núcleo suma 1500 y que una bala desviada 8 píxeles cae en un cañón, y en la ronda 5 el núcleo se abre, se cierra y lanza su misil.
+5. **Medición**: perfilar la ronda 10 en escritorio y en la web con cProfile y SnakeViz, y decidir con esos datos si hace falta la cuadrícula de colisiones.
 
 **Frente C**
 1. **Alertas** según la sección 5.11: `CAlert` en una entidad propia y `system_alerts`.
@@ -809,7 +829,8 @@ Esta etapa es de todos. Los documentos se escriben a la par que el pulido, desde
 - **La versión web falla y el problema aparece al final.** Se evita publicando un borrador desde la etapa 0 y construyendo la versión web cada semana. Las causas típicas son `pygame.SCALED`, un `main.py` sin `import pygame`, sonidos en un formato distinto de OGG y bucles sin `await`.
 - **Los frentes nombran las cosas distinto y la integración se traba.** Se evita acordando los nombres de la sección 4 en la etapa 0 y uniendo el trabajo en `main` al final de cada etapa.
 - **El código se aleja del patrón ECS del curso.** Pasa, por ejemplo, cuando se guarda el tipo de una entidad como texto y un solo sistema decide con `if`, o cuando un componente tiene lógica. Se evita revisando las reglas de la sección 4.1 en cada pull request.
-- **El juego va lento en el navegador con muchos obstáculos.** Se evita con la cuadrícula de colisiones de la sección 5.15.
+- **El juego va lento en el navegador con muchos obstáculos.** Se mide con cProfile y SnakeViz antes de optimizar, y si las colisiones pesan se usa la cuadrícula de la sección 5.15.
+- **Las escenas acumulan lógica fuera de ECS.** Pasa cuando el `update` de una escena se llena de cálculos o cuando hay sistemas copiados con pocos cambios. Se evita con las reglas 8 y 12 de la sección 4.1 en cada revisión.
 - **La alerta roja hace el juego demasiado difícil.** La lista pide enemigos al doble de velocidad y de ritmo, y ella misma advierte que hay que probarlo. Los multiplicadores están en `alerts.json` para ajustarlos jugando sin tocar el código.
 - **El historial muestra el trabajo de una sola persona.** Se evita con ramas y pull requests por tarea, y con commits de cada integrante todas las semanas.
 
@@ -841,7 +862,9 @@ Esta lista recorre la rúbrica completa. Antes de la entrega final, el grupo rev
 **Código**
 - [ ] El repositorio es privado, con acceso para profesores y monitores, y tiene el tag `v1.0-final` con descripción.
 - [ ] Se ven ECS, game loop, Command, State, Service Locator, Escena y archivos de configuración.
-- [ ] El código cumple las reglas de ECS de la sección 4.1: componentes sin lógica, etiquetas para filtrar, un sistema de colisión por par y la configuración de cada entidad en su JSON.
+- [ ] El código cumple las reglas de ECS de la sección 4.1: componentes sin lógica, etiquetas para filtrar, un sistema de colisión por par con la ayuda común, toda tecla por Command, servicios para lo global y la configuración de cada entidad en su JSON.
+- [ ] El motor solo administra escenas, y cada escena solo arma su mundo y llama a sus sistemas.
+- [ ] Las vistas de depurado y el modo editor funcionan, y el README explica cómo usarlos.
 - [ ] El código del tag corresponde al juego publicado.
 - [ ] El historial muestra commits de los cuatro integrantes a lo largo de las semanas.
 
