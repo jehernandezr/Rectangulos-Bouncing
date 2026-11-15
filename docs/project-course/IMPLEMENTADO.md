@@ -47,6 +47,7 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Medición | Ronda 10 en alerta roja durante 30 s con cProfile: 1,58 ms por cuadro con el perfilador encendido, de los 16,7 ms que tiene un cuadro a 60 FPS. Las colisiones son el 58 % de la simulación (0,9 ms). Con eso la cuadrícula de colisiones queda fuera; se vuelve a medir en la versión web | Medición sobre la pila del PR 19 |
 | Documentación | `README.md` con instrucciones, controles, modo trampa y estructura | main |
 | Sonidos | `sounds_service` y `sounds.json` | PR 23 |
+| Interfaz con ECS | Las pantallas se arman con prefabs y el texto que cambia usa `CChangingText`, que dibuja un solo sistema. Título, pausa y opciones comparten un `CMenu` cuyas entradas se describen en `interface.json`; instrucciones y créditos muestran sus páginas con la misma navegación. Una sola salida de escena con `CEventSceneExit`, y game over con los eventos de continuar y de fin del tiempo | PR 23 |
 
 ## Bonos
 
