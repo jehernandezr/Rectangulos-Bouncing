@@ -10,6 +10,8 @@ Estado del repositorio `dso-uniandes/bosconian` al 17 de noviembre de 2026. Todo
 - **PR 29**: alertas, puntaje, vidas extra y panel del frente C.
 - **PR 30**: el panel con etiquetas y componentes, los textos centrados otra vez al centro, HI-SCORE visible, el panel del título y los sonidos de alerta desde `alerts.json`, con la sirena RED que se repite.
 - **PR 31**: el editor arma sus piezas arrastrables en los prefabs y oculta el BLAST OFF, el cañón destruido se resuelve con un evento y los choques que solo cambiaban una etiqueta quedan en un sistema.
+- **PR 32**: los sonidos de explosiones, cañones, núcleo, misil E y base destruida, cada uno desde el JSON de su entidad.
+- **PR 33**: las vistas de depurado de hitboxes y velocidades con Mayús + 1.
 
 Cada punto dice en qué PR entró.
 
@@ -33,7 +35,7 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Colisiones con hitbox | Componente `CHitbox` en todas las entidades que chocan. Una consulta común, `colliding_pairs` en `src/ecs/queries`, arma los rectángulos con `wrapped_delta` y cada par tiene su sistema: bala y jugador contra obstáculo, enemigo y base; enemigo contra enemigo, peligro y base; bala de cañón contra obstáculo. Los choques crean eventos (enemigo muerto, obstáculo destruido, rebote) que atiende un sistema para cada uno | Sistemas en PR 14 a 19; eventos en PR 23; mina y rocas indestructibles en PR 24 y 25 | Ítem |
 | Puntaje, récord y vidas | `system_score` suma los puntos a la sesión y sube el récord, que arranca en 20.000. `system_lives` resta una vida en cada muerte y cuenta las naves perdidas. `system_score` también da las vidas extra de `scoring.json`. El panel muestra récord, puntaje, condición, vidas y ronda | main; vidas en PR 23; vidas extra y panel en PR 29 | |
 | Alertas | `CAlert` con su máquina de estados en `system_alerts`: GREEN al empezar y al reaparecer, YELLOW por tiempo, RED al acabarse la espera de la ronda, con parpadeo y alarma repetida, y GREEN por 3,2 s al destruir una base. La trampa 6 cambia la alerta | main; máquina de estados en PR 29 | Formación y espía |
-| Sonidos y música | Servicio de sonidos, `sounds.json`, 22 efectos en OGG y música por ronda, que arranca al terminar el BLAST OFF | PR 22 y PR 23 | Conectar los efectos a cada evento del juego |
+| Sonidos y música | Servicio de sonidos, `sounds.json`, 22 efectos en OGG y música por ronda, que arranca al terminar el BLAST OFF. Suenan las alertas, la vida extra, los menús, las explosiones (el prefab toca el sonido de `explosion.json`), la apertura y el disparo de los cañones, el golpe en el núcleo cerrado, el misil E y la base destruida | PR 22 y PR 23; efectos del frente B en PR 32 | Disparo del jugador y del EXTRA CANNON, espía y formación |
 
 ## Motor y patrones del curso
 
@@ -51,6 +53,7 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Orden de dibujo | Capas del mundo en `window.json`, con el cuerpo de la base debajo de sus cañones y su núcleo | main |
 | Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON, la 6 cambia la alerta, la 7 destruye todas las bases, la 8 va a la victoria y la 9 al game over. Cada trampa tiene su nombre en `cheats.json` y el comando lo anota en `CCheatMode` | main; la 7 en PR 20; la 8, la 9 y los nombres en PR 23 |
 | Pausa | ESC o P pausan y reanudan la partida con una sola bandera de la escena de juego. En pausa se ocultan el jugador, los enemigos y el minimapa, las estrellas quedan quietas brillando, aparece "JUEGO PAUSADO" con su menú y se pueden abrir las opciones. El texto y el menú se crean una vez y `system_pause_visibility`, desde `do_update`, los muestra u oculta con `CVisible`; también oculta el "BLAST OFF!!" (`CTagHiddenInPause`) si se pausa durante la cuenta | PR 23 |
+| Vistas de depurado | Con trampa activa, Mayús + 1 rota entre la vista normal, la de hitboxes (`system_rendering_debug_rects`) y la de velocidades (`system_rendering_debug_velocity`), con los colores y la escala en `debug.json` | PR 33 |
 | Medición | Ronda 10 en alerta roja durante 30 s con cProfile: 1,58 ms por cuadro con el perfilador encendido, de los 16,7 ms que tiene un cuadro a 60 FPS. Las colisiones son el 58 % de la simulación (0,9 ms). Con eso la cuadrícula de colisiones queda fuera | Medición sobre el PR 19 |
 | Documentación | `README.md` con instrucciones, controles, modo trampa y estructura | main |
 | Sonidos | `sounds_service` y `sounds.json` | PR 22 |
