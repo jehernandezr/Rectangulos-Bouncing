@@ -12,6 +12,8 @@ Estado del repositorio `dso-uniandes/bosconian` al 17 de noviembre de 2026. Todo
 - **PR 31**: el editor arma sus piezas arrastrables en los prefabs y oculta el BLAST OFF, el cañón destruido se resuelve con un evento y los choques que solo cambiaban una etiqueta quedan en un sistema.
 - **PR 32**: los sonidos de explosiones, cañones, núcleo, misil E y base destruida, cada uno desde el JSON de su entidad.
 - **PR 33**: las vistas de depurado de hitboxes y velocidades con Mayús + 1.
+- **PR 34**: morir con la última vida al derribar la última base lleva al game over, y al continuar empieza la ronda siguiente, como en el original.
+- **PR 35**: si la nave choca una base, la condición se queda como estaba hasta que reaparece, y el título muestra ROUND 1 y el récord, como en el original.
 
 Cada punto dice en qué PR entró.
 
