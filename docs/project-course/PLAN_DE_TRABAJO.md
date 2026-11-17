@@ -307,7 +307,7 @@ El panel tiene fondo negro y usa la fuente de píxeles de 8 x 8. Estas son las p
 - **Aceleración**: unos 48 px/s². Llega a su velocidad máxima en cerca de 1,4 segundos. La velocidad máxima depende de la ronda, desde 65,9 px/s en la ronda 1 hasta 88,4 px/s en la 10.
 - **Sprite**: tiene 8 orientaciones. El recorte base es `[124, 7, 15, 18]` de `naves.png`, que mira hacia arriba, y las otras siete se obtienen rotándolo al cargar.
 - **Vidas**: empieza con 4 vidas, contando la que está en juego (cuando el panel muestra cero vidas de reserva, queda la de la nave en juego, como dice la lista). Gana una vida extra a los 50.000 puntos, otra a los 100.000 y después una cada 100.000 (200.000, 300.000, 400.000 y así). No hay máximo: si las vidas de reserva superan las 4 visibles, un número muestra el total.
-- **Muerte**: varias explosiones escalonadas. El juego se congela unos 2,5 segundos y la nave reaparece en el punto de inicio de la ronda. La condición vuelve a GREEN, salvo que esté en RED, porque de RED no se baja.
+- **Muerte**: varias explosiones escalonadas. El juego se congela unos 2,5 segundos y la nave reaparece en el punto de inicio de la ronda con "BLAST OFF!". La condición vuelve a GREEN, salvo que esté en RED, porque de RED no se baja.
 - **Choques**: si la nave choca con un enemigo o un obstáculo, mueren los dos y el jugador recibe los puntos del objeto. Si choca con cualquier parte de una base, la base cae completa, el jugador suma 1500 y muere.
 
 ### 5.4 Disparo del jugador
@@ -315,7 +315,7 @@ El panel tiene fondo negro y usa la fuente de píxeles de 8 x 8. Estas son las p
 - Cada disparo saca **un par de balas**, una hacia adelante y otra hacia atrás.
 - Las balas van a unos 277 px/s respecto a la nave y desaparecen al salir de la pantalla, como pide la lista. Desde el centro de la pantalla eso ocurre a unos 100 píxeles, igual que en el original.
 - Con el botón mantenido sale un par nuevo cada 0,32 segundos, con un máximo de dos pares en pantalla.
-- Mientras se muestra "BLAST OFF!!" el disparo está bloqueado.
+- Mientras se muestra "BLAST OFF!" el disparo está bloqueado.
 - Sprites de la bala: vertical `[4, 75, 4, 6]`, horizontal `[13, 76, 6, 4]` y diagonal `[23, 75, 7, 6]`. La otra diagonal es la misma imagen volteada.
 - El disparo tiene sonido (sección 5.19).
 
@@ -323,7 +323,7 @@ El panel tiene fondo negro y usa la fuente de píxeles de 8 x 8. Estas son las p
 
 La habilidad especial se define por nivel, como pide la lista, y la tienen las **rondas 3, 6, 9 y 10**:
 
-- Al principio de esas rondas, junto con "BLAST OFF!!", aparece el mensaje "EXTRA CANNON" que anuncia la habilidad.
+- Al principio de esas rondas, junto con "BLAST OFF!", aparece el mensaje "EXTRA CANNON" que anuncia la habilidad.
 - Durante toda la ronda cada disparo saca cuatro balas: tres al frente y una atrás. La central va recta y las dos laterales se abren un píxel por cuadro del original (unos 55 px/s hacia los lados), que es como se ve en el original.
 - Si el jugador muere, la recupera al reaparecer, porque la habilidad pertenece a la ronda.
 - El archivo de cada nivel indica si la ronda tiene la habilidad, así el editor y el jefe también pueden activarla.
@@ -335,8 +335,8 @@ La habilidad especial se define por nivel, como pide la lista, y la tienen las *
   - base H: (0, -28), (-24, -12), (24, -12), (-24, 12), (24, 12) y (0, 28);
   - base V: (-28, 0), (-12, -24), (-12, 24), (12, -24), (12, 24) y (28, 0).
 - **Puntos**: cada cañón vale 200 y el núcleo vale 1500. Un disparo al núcleo destruye la base completa. Destruir el sexto cañón también destruye la base, y ese disparo suma 1700 (200 del cañón más 1500 de la base).
-- **Al destruir una base**, la condición pasa a GREEN durante 3,2 segundos y luego vuelve a YELLOW. Si está en RED, se queda en RED, porque de RED no se baja.
-- **Ronda completa**: cuando cae la última base, la ronda sigue unos 2 segundos, después el panel cambia el número de ronda y la condición pasa a GREEN, y el jugador reaparece a los 2,5 segundos con "BLAST OFF!!". No hay pantalla intermedia entre rondas.
+- **Al destruir una base**, toda la base explota con estallidos grandes en cada cañón y en el núcleo, y sus puntos se ven sobre el núcleo durante 1,6 segundos. La condición pasa a GREEN durante 3,2 segundos y luego vuelve a YELLOW. Si está en RED, se queda en RED, porque de RED no se baja.
+- **Ronda completa**: cuando cae la última base, la ronda sigue unos 2 segundos, después el panel cambia el número de ronda y la condición pasa a GREEN, y el jugador reaparece a los 2,5 segundos con "BLAST OFF!". No hay pantalla intermedia entre rondas.
 - **Sprites**:
   - cañón: `[0, 9, 16, 16]`, `[21, 9, 16, 16]`, `[42, 9, 16, 16]` y `[63, 9, 16, 16]`, que son cerrado, abriéndose, abierto y destruido;
   - núcleo: `[0, 46, 20, 20]`, `[24, 46, 20, 20]`, `[48, 46, 20, 20]` y `[72, 46, 20, 20]`;
@@ -512,7 +512,7 @@ Toda colisión produce una explosión con el prefab `create_explosion`, y la del
 2. **Título**: el logo COSMONIAN del curso con "STAR DESTROYER" encima, alternando fondo verde y fondo negro como en el original. Debajo va el menú: selección de nivel, opciones, instrucciones y créditos. La música es "exploratig_the_cosmos".
 3. **Modo atractor** (bono): después de un rato sin tocar nada, el juego se juega solo durante una demo y luego muestra las instrucciones. Cualquier tecla lo interrumpe y vuelve al título.
 4. **Cutscene al empezar** (bono): tres torres de la nave nodriza suben por la pantalla con el texto "AROUND THE PLANET RED.", luego aparecen "LEVEL 1" y "AROUND THE PLANET RED." centrados con la nave nodriza abajo, y empieza la ronda.
-5. **Inicio de ronda**: el texto "BLAST OFF!!" en el centro y su sonido, durante unos 2,4 segundos, con la nave quieta y el disparo bloqueado. En las rondas con habilidad especial aparece también "EXTRA CANNON". Después la nave empieza a acelerar.
+5. **Inicio de ronda**: el texto "BLAST OFF!" en letra pequeña debajo de la nave y su sonido, durante unos 0,7 segundos, con la nave quieta y el disparo bloqueado. En las rondas con habilidad especial aparece también "EXTRA CANNON". Después la nave empieza a acelerar.
 6. **Pausa**: con ESC (y con P, como atajo), como pide la lista:
    - los enemigos y el jugador desaparecen de la pantalla;
    - las estrellas quedan quietas pero siguen brillando;
@@ -751,8 +751,8 @@ Al terminar esta etapa, la nave vuela por la ronda 1 con el mundo, las estrellas
 
 **Frente D** (independiente)
 1. **Escenas de título, opciones, instrucciones y créditos** según la sección 5.17, con las estrellas cayendo y la música del título.
-2. **Texto "BLAST OFF!!"** al inicio de ronda, con la nave quieta y el disparo bloqueado.
-   - *Listo cuando:* desde el título se elige un nivel y se entra a la ronda con "BLAST OFF!!".
+2. **Texto "BLAST OFF!"** al inicio de ronda, con la nave quieta y el disparo bloqueado.
+   - *Listo cuando:* desde el título se elige un nivel y se entra a la ronda con "BLAST OFF!".
 
 **Integración**: al final de la etapa, el grupo une las cuatro partes en `main`, juega la ronda 1 y actualiza el borrador de itch.io.
 

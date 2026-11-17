@@ -14,6 +14,8 @@ Estado del repositorio `dso-uniandes/bosconian` al 17 de noviembre de 2026. Todo
 - **PR 33**: las vistas de depurado de hitboxes y velocidades con Mayús + 1.
 - **PR 34**: morir con la última vida al derribar la última base lleva al game over, y al continuar empieza la ronda siguiente, como en el original.
 - **PR 35**: si la nave choca una base, la condición se queda como estaba hasta que reaparece, y el título muestra ROUND 1 y el récord, como en el original.
+- **PR 36**: toda la base explota con estallidos grandes en cada cañón y en el núcleo, y sus puntos se ven sobre el núcleo durante 1,6 segundos, como en el original.
+- **PR 37**: "BLAST OFF!" dura 0,7 segundos en letra pequeña debajo de la nave y aparece también cada vez que la nave reaparece, como en el original.
 
 Cada punto dice en qué PR entró.
 
@@ -54,7 +56,7 @@ El plan completo está en [PLAN_DE_TRABAJO.md](PLAN_DE_TRABAJO.md).
 | Configuración | Un JSON por tipo de entidad y uno por ronda, sin valores del juego en el código, sin comentarios ni docstrings | main |
 | Orden de dibujo | Capas del mundo en `window.json`, con el cuerpo de la base debajo de sus cañones y su núcleo | main |
 | Modo trampa | La tecla 0 lo activa y el panel muestra "CHEAT". La acción 4 activa el EXTRA CANNON, la 6 cambia la alerta, la 7 destruye todas las bases, la 8 va a la victoria y la 9 al game over. Cada trampa tiene su nombre en `cheats.json` y el comando lo anota en `CCheatMode` | main; la 7 en PR 20; la 8, la 9 y los nombres en PR 23 |
-| Pausa | ESC o P pausan y reanudan la partida con una sola bandera de la escena de juego. En pausa se ocultan el jugador, los enemigos y el minimapa, las estrellas quedan quietas brillando, aparece "JUEGO PAUSADO" con su menú y se pueden abrir las opciones. El texto y el menú se crean una vez y `system_pause_visibility`, desde `do_update`, los muestra u oculta con `CVisible`; también oculta el "BLAST OFF!!" (`CTagHiddenInPause`) si se pausa durante la cuenta | PR 23 |
+| Pausa | ESC o P pausan y reanudan la partida con una sola bandera de la escena de juego. En pausa se ocultan el jugador, los enemigos y el minimapa, las estrellas quedan quietas brillando, aparece "JUEGO PAUSADO" con su menú y se pueden abrir las opciones. El texto y el menú se crean una vez y `system_pause_visibility`, desde `do_update`, los muestra u oculta con `CVisible`; también oculta el "BLAST OFF!" (`CTagHiddenInPause`) si se pausa durante la cuenta | PR 23 |
 | Vistas de depurado | Con trampa activa, Mayús + 1 rota entre la vista normal, la de hitboxes (`system_rendering_debug_rects`) y la de velocidades (`system_rendering_debug_velocity`), con los colores y la escala en `debug.json` | PR 33 |
 | Medición | Ronda 10 en alerta roja durante 30 s con cProfile: 1,58 ms por cuadro con el perfilador encendido, de los 16,7 ms que tiene un cuadro a 60 FPS. Las colisiones son el 58 % de la simulación (0,9 ms). Con eso la cuadrícula de colisiones queda fuera | Medición sobre el PR 19 |
 | Documentación | `README.md` con instrucciones, controles, modo trampa y estructura | main |
