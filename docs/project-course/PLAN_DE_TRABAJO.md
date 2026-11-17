@@ -766,7 +766,7 @@ Al terminar esta etapa se puede jugar cualquier ronda con todas sus reglas, perd
 3. **Núcleo y misil E** según la sección 5.8, con el patrón State: `CCoreState` guarda si está abierto o cerrado y `system_core_state` lo cambia y lanza el misil.
 4. **Destrucción de bases** según la sección 5.6: el sistema de colisión crea un evento `CEventBaseDestroyed`, y `system_base_destroyed` borra la base completa y da los puntos.
    - *Listo cuando:* una simulación sin ventana confirma que una bala por el eje del núcleo suma 1500 y que una bala desviada 8 píxeles cae en un cañón, y en la ronda 5 el núcleo se abre, se cierra y lanza su misil.
-5. **Medición**: perfilar la ronda 10 en escritorio y en la web con cProfile y SnakeViz, y decidir con esos datos si hace falta la cuadrícula de colisiones.
+5. **Medición**: perfilar la ronda 10 en escritorio con cProfile y SnakeViz, y decidir con esos datos si hace falta la cuadrícula de colisiones.
 
 **Frente C**
 1. **Alertas** según la sección 5.11: `CAlert` en una entidad propia y `system_alerts`.
