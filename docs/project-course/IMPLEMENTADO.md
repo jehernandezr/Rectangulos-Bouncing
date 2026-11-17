@@ -8,8 +8,8 @@ Estado del repositorio `dso-uniandes/bosconian` al 17 de noviembre de 2026. Todo
 - **PR 23**: los ajustes de ECS sobre las escenas de Jerson y los arreglos de la revisión de cada PR con la skill.
 - **PR 24 a 28**: la etapa 3 del frente B (explosión letal de la mina, rocas indestructibles, editor de niveles con guardado y la música de los niveles), mezclados en orden.
 - **PR 29**: alertas, puntaje, vidas extra y panel del frente C.
-
-El PR 30 (panel con componentes y alineación de los textos que cambian) está abierto.
+- **PR 30**: el panel con etiquetas y componentes, los textos centrados otra vez al centro, HI-SCORE visible, el panel del título y los sonidos de alerta desde `alerts.json`, con la sirena RED que se repite.
+- **PR 31**: el editor arma sus piezas arrastrables en los prefabs y oculta el BLAST OFF, el cañón destruido se resuelve con un evento y los choques que solo cambiaban una etiqueta quedan en un sistema.
 
 Cada punto dice en qué PR entró.
 
